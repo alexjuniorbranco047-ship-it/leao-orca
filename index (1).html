@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Leão Orça</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E🦁%3C/text%3E%3C/svg%3E">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#ffffff;--card:#fffbea;--tx:#241d05;--mu:#7a6f4a;--pr:#f7b900;--pt:#8a5f00;--on:#2a2000;--ln:#f1e6b8;--ok:#1f9d5c;--wa:#e07a1f;--bl:#2c78c9;--rd:#d4493e}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14110a;--card:#211c0f;--tx:#fff8e0;--mu:#b5a878;--pr:#ffc933;--pt:#ffc933;--on:#1a1400;--ln:#3a3218}}
+:root[data-theme="dark"]{--bg:#14110a;--card:#211c0f;--tx:#fff8e0;--mu:#b5a878;--pr:#ffc933;--pt:#ffc933;--on:#1a1400;--ln:#3a3218}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 "Bricolage Grotesque",system-ui,sans-serif;padding-bottom:150px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+header{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5;padding:14px 18px 10px;display:flex;align-items:center;gap:10px}
+header h1{font-size:22px;font-weight:800;margin:0;flex:1;letter-spacing:-.4px}
+.logo{width:34px;height:34px;border-radius:10px;background:var(--pr);display:grid;place-items:center;font-size:19px}
+.logo{overflow:hidden}.logo img{width:100%;height:100%;object-fit:contain}
+main{padding:0 18px;max-width:560px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--ln);border-radius:20px;padding:14px;margin-bottom:10px}
+.big{background:var(--pr);color:var(--on);border:0}
+.big small{opacity:.8}.big b{display:block;font-size:30px;font-weight:800;letter-spacing:-1px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{text-align:left;font:inherit;color:inherit;cursor:pointer}
+.tile b{display:block;font-size:26px;font-weight:800}
+small,.mu{color:var(--mu);font-size:13px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.row+.row{margin-top:6px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+input,select{width:100%;font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--ln);border-radius:10px;padding:11px 12px;margin:4px 0 8px}
+label{font-size:13px;color:var(--mu);font-weight:600}
+button{font:inherit;cursor:pointer}
+.btn{background:var(--pr);color:var(--on);border:0;border-radius:12px;padding:13px 16px;font-weight:600;width:100%}
+.ghost{background:transparent;color:var(--pt);border:1px solid var(--ln)}
+.danger{color:var(--rd)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:6px}
+.chip{flex:none;border:1px solid var(--ln);background:var(--card);color:var(--tx);border-radius:20px;padding:7px 13px;font-size:14px}
+.chip.on{background:var(--pr);color:var(--on);border-color:var(--pr)}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--ln);display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));z-index:6}
+nav button{flex:1;background:none;border:0;color:var(--mu);padding:8px 0;font-size:12px;font-weight:600}
+nav button.on{color:var(--pt)}nav span{display:block;font-size:20px}
+.fab{position:fixed;right:18px;bottom:calc(76px + env(safe-area-inset-bottom,0px));background:var(--tx);color:var(--bg);border:0;border-radius:16px;padding:14px 18px;font-weight:800;box-shadow:0 6px 18px rgba(0,0,0,.22);z-index:6}
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:20;display:flex;align-items:flex-end}
+.sheet>div{background:var(--card);width:100%;max-width:560px;margin:0 auto;border-radius:20px 20px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));max-height:90%;overflow:auto;animation:up .2s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+.bars{display:flex;flex-direction:column;gap:12px}
+.bar{height:14px;border-radius:7px;background:var(--ln);overflow:hidden}.bar i{display:block;height:100%;border-radius:7px}
+.it{display:grid;grid-template-columns:1fr 78px 48px 38px;gap:6px;align-items:start}.it .chip{margin-top:4px;padding:9px 0}
+.empty{text-align:center;padding:30px 10px;color:var(--mu)}
+#login{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:center}
+</style></head>
+<body>
+<header><div class="logo">🦁</div><h1 id="ttl">Leão Orça<small style="display:block;font-weight:400">Orçamentos sem complicação</small></h1><span id="nv" title="Nuvem">📴</span><button class="chip" onclick="emp()" title="Empresa">🏢</button><button class="chip" onclick="conta()" title="Minha conta">👤</button></header>
+<main id="app"></main>
+<button class="fab" onclick="novo()">+ Novo orçamento</button>
+<nav id="nav"></nav>
+<div id="sh"></div>
+<div id="login"><div style="width:100%;max-width:360px;padding:24px;text-align:center">
+<div class="logo" style="width:64px;height:64px;font-size:34px;margin:0 auto 12px">🦁</div>
+<h1 style="margin:0 0 4px;font-size:28px;font-weight:800">Leão Orça</h1>
+<p class="mu" style="margin:0 0 18px">Orçamentos sem complicação</p>
+<div id="lc" class="mu">Carregando…</div>
+<div id="lf" style="display:none;text-align:left">
+<label>E-mail</label><input id="le" type="email" autocomplete="email" inputmode="email">
+<label>Senha</label><input id="ls" type="password" autocomplete="current-password">
+<p id="lm" style="color:var(--rd);min-height:20px;margin:0 0 8px;font-size:14px"></p>
+<button class="btn" onclick="entrar()">Entrar</button>
+<button class="btn ghost" style="margin-top:8px" onclick="criar()">Criar conta</button>
+<p style="text-align:center"><button class="chip" style="border:0;background:none;color:var(--pt)" onclick="esqueci()">Esqueci a senha</button></p>
+</div></div></div>
+<script>
+const ST=["Pendente","Aguardando aprovação","Em andamento","Aguardando pagamento","Concluído"];
+const COR={"Pendente":"var(--wa)","Aguardando aprovação":"var(--wa)","Em andamento":"var(--bl)","Aguardando pagamento":"var(--bl)","Concluído":"var(--ok)"};
+const brl=n=>n.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const tot=o=>Math.max(0,o.itens.reduce((s,i)=>s+i.p*i.q,0)*(1-(o.desc||0)/100));
+const d=(n)=>{const x=new Date();x.setDate(x.getDate()-n);return x.toISOString().slice(0,10)};
+const dt=s=>s.split("-").reverse().join("/");
+let DB={clientes:[{id:1,nome:"Marina Duarte",tel:"(11) 98888-1111"},{id:2,nome:"Carlos Ribeiro",tel:"(21) 97777-2222"}],
+pedidos:[{id:1,cliente:"Marina Duarte",status:"Concluído",data:d(9),desc:0,itens:[{d:"Instalação de ar-condicionado",p:850,q:2}]},
+{id:2,cliente:"Carlos Ribeiro",status:"Aguardando aprovação",data:d(2),desc:10,itens:[{d:"Análise de consumo",p:500,q:1},{d:"Automação residencial",p:5000,q:1}]},
+{id:3,cliente:"Marina Duarte",status:"Em andamento",data:d(4),desc:0,itens:[{d:"Manutenção preventiva",p:320,q:3}]}],seq:4};
+try{const s=JSON.parse(localStorage.getItem("leao-orca"));if(s&&s.pedidos)DB=s}catch(e){}
+DB.catalogo=DB.catalogo||[];
+let CL=null,nt=0;
+const save=()=>{DB.t=Date.now();try{localStorage.setItem("leao-orca",JSON.stringify(DB))}catch(e){}push()};
+let EMP={nome:"",doc:"",tel:"",email:"",end:"",val:7,logo:null};
+try{const s=JSON.parse(localStorage.getItem("leao-orca-emp"));if(s)EMP={...EMP,...s}}catch(e){}
+let tab="inicio",filtro="Todos",busca="";
+const TABS=[["inicio","🏠","Início"],["pedidos","📋","Orçamentos"],["clientes","👥","Clientes"],["catalogo","🧰","Catálogo"],["gestao","📊","Gestão"]];
+const num=o=>String(o.id).padStart(3,"0")+"-"+o.data.slice(0,4);
+
+function render(){
+  const L=document.querySelector(".logo");if(L)L.innerHTML=EMP.logo?`<img src="${EMP.logo.u}" alt="">`:"🦁";
+  document.getElementById("nav").innerHTML=TABS.map(t=>`<button class="${tab==t[0]?"on":""}" onclick="tab='${t[0]}';render();scrollTo(0,0)"><span>${t[1]}</span>${t[2]}</button>`).join("");
+  document.getElementById("app").innerHTML=V[tab]();
+}
+const pill=o=>`<span class="dot" style="background:${COR[o.status]}"></span><small>${o.status}</small>`;
+const lista=ps=>ps.length?ps.map(o=>`<div class="card tile" onclick="det(${o.id})"><div>${pill(o)}</div><div class="row"><div><b>${esc(o.cliente)}</b><br><small>Nº ${num(o)} · ${dt(o.data)}</small></div><b>${brl(tot(o))}</b></div></div>`).join(""):`<div class="empty">Nenhum orçamento aqui ainda.<br>Toque em “Novo orçamento” para criar o primeiro.</div>`;
+const V={
+inicio(){
+  const ab=DB.pedidos.filter(o=>o.status!="Concluído");
+  const rec=DB.pedidos.filter(o=>o.status=="Aguardando pagamento").reduce((s,o)=>s+tot(o),0);
+  return `<div class="card big"><small>A receber</small><b>${brl(rec)}</b><small>${ab.length} orçamento(s) em aberto</small></div>
+  <div class="grid"><button class="card tile" onclick="tab='pedidos';filtro='Aguardando aprovação';render()"><small>Aguardando aprovação</small><b>${DB.pedidos.filter(o=>o.status=="Aguardando aprovação").length}</b></button>
+  <button class="card tile" onclick="tab='pedidos';filtro='Em andamento';render()"><small>Em andamento</small><b>${DB.pedidos.filter(o=>o.status=="Em andamento").length}</b></button>
+  <button class="card tile" onclick="tab='clientes';render()"><small>Clientes</small><b>${DB.clientes.length}</b></button>
+  <button class="card tile" onclick="tab='gestao';render()"><small>Concluídos</small><b>${DB.pedidos.filter(o=>o.status=="Concluído").length}</b></button></div>
+  <h3>Últimos orçamentos</h3>${lista([...DB.pedidos].reverse().slice(0,3))}`},
+pedidos(){
+  let ps=[...DB.pedidos].reverse().filter(o=>(filtro=="Todos"||o.status==filtro)&&o.cliente.toLowerCase().includes(busca.toLowerCase()));
+  return `<input placeholder="Buscar por cliente" value="${esc(busca)}" oninput="busca=this.value;lst()">
+  <div class="chips">${["Todos",...ST].map(s=>`<button class="chip ${filtro==s?"on":""}" onclick="filtro='${s}';render()">${s}</button>`).join("")}</div><div id="lst">${lista(ps)}</div>`},
+clientes(){return `<button class="btn ghost" style="margin-bottom:10px" onclick="novoCli()">+ Novo cliente</button>`+(DB.clientes.length?DB.clientes.map(c=>{const n=DB.pedidos.filter(o=>o.cliente==c.nome).length;return `<div class="card row"><div><b>${esc(c.nome)}</b><br><small>${esc(c.tel||"Sem telefone")} · ${n} orçamento(s)</small></div><button class="chip danger" onclick="delCli(${c.id})">Excluir</button></div>`}).join(""):`<div class="empty">Cadastre seus clientes para criar orçamentos mais rápido.</div>`)},
+catalogo(){return `<button class="btn ghost" style="margin-bottom:10px" onclick="cat()">+ Novo serviço ou produto</button>`+(DB.catalogo.length?[...DB.catalogo].sort((a,b)=>a.nome.localeCompare(b.nome)).map(c=>`<div class="card"><div class="row"><div><b>${esc(c.nome)}</b><br><small>${c.tipo}</small></div><b>${brl(c.preco)}</b></div><div class="row" style="justify-content:flex-end"><button class="chip" onclick="cat(${c.id})">Editar</button><button class="chip danger" onclick="delCat(${c.id})">Excluir</button></div></div>`).join(""):`<div class="empty">Cadastre seus serviços e produtos com preço.<br>Ao criar um orçamento, é só escolher da lista e o preço entra sozinho.</div>`)},
+gestao(){
+  const s=x=>DB.pedidos.filter(o=>x.includes(o.status)).reduce((a,o)=>a+tot(o),0);
+  const r=[["Recebido",s(["Concluído"]),"var(--ok)"],["A receber",s(["Aguardando pagamento","Em andamento"]),"var(--bl)"],["Em negociação",s(["Pendente","Aguardando aprovação"]),"var(--wa)"]];
+  const mx=Math.max(1,...r.map(x=>x[1]));
+  return `<div class="card big"><small>Previsão total</small><b>${brl(r[0][1]+r[1][1])}</b><small>recebido + a receber</small></div>
+  <div class="card bars">${r.map(x=>`<div><div class="row"><span>${x[0]}</span><b>${brl(x[1])}</b></div><div class="bar"><i style="width:${x[1]/mx*100}%;background:${x[2]}"></i></div></div>`).join("")}</div>
+  <div class="card"><small>Em negociação ainda não entra na previsão: só conta depois que o cliente aprovar.</small></div>`}
+};
+function lst(){let ps=[...DB.pedidos].reverse().filter(o=>(filtro=="Todos"||o.status==filtro)&&o.cliente.toLowerCase().includes(busca.toLowerCase()));document.getElementById("lst").innerHTML=lista(ps)}
+function sheet(h){document.getElementById("sh").innerHTML=`<div class="sheet" onclick="if(event.target==this)fecha()"><div>${h}</div></div>`}
+function fecha(){document.getElementById("sh").innerHTML=""}
+function novoCli(){sheet(`<h3>Novo cliente</h3><label>Nome</label><input id="cn"><label>Telefone</label><input id="ct" type="tel"><button class="btn" onclick="salvaCli()">Salvar cliente</button>`)}
+function salvaCli(){const n=cn.value.trim();if(!n){cn.focus();return}DB.clientes.push({id:DB.seq++,nome:n,tel:ct.value.trim()});save();fecha();render()}
+function delCli(id){DB.clientes=DB.clientes.filter(c=>c.id!=id);save();render()}
+function linha(i){i=i||{d:"",p:"",q:1};return `<div class="it"><input placeholder="Descrição ou do catálogo" class="id" list="cat" oninput="pick(this)" value="${esc(i.d)}"><input placeholder="Preço" type="number" inputmode="decimal" class="ip" value="${i.p}"><input placeholder="Qtd" type="number" inputmode="numeric" class="iq" value="${i.q}"><button class="chip danger" onclick="this.parentNode.remove()">✕</button></div>`}
+function novo(id){const e=DB.pedidos.find(x=>x.id==id);sheet(`<h3>${e?"Editar orçamento":"Novo orçamento"}</h3><label>Cliente</label><input id="oc" list="cl" placeholder="Nome do cliente" value="${e?esc(e.cliente):""}"><datalist id="cl">${DB.clientes.map(c=>`<option value="${esc(c.nome)}">`).join("")}</datalist>
+  <datalist id="cat">${DB.catalogo.map(c=>`<option value="${esc(c.nome)}">`).join("")}</datalist><label>Serviços e produtos</label><div id="its">${e?e.itens.map(i=>linha(i)).join(""):linha()+linha()}</div><button class="btn ghost" onclick="its.insertAdjacentHTML('beforeend',linha())">+ Adicionar item</button>
+  <label style="display:block;margin-top:10px">Desconto (%)</label><input id="od" type="number" inputmode="decimal" value="${e?e.desc||0:0}"><button class="btn" onclick="salvaOrc(${e?e.id:0})">${e?"Salvar alterações":"Criar orçamento"}</button>`)}
+function salvaOrc(eid){
+  const c=oc.value.trim();const itens=[...document.querySelectorAll("#its .it")].map(r=>({d:r.querySelector(".id").value.trim(),p:parseFloat(r.querySelector(".ip").value)||0,q:parseFloat(r.querySelector(".iq").value)||1})).filter(i=>i.d&&i.p>0);
+  if(!c){oc.focus();return}if(!itens.length){alert("Adicione ao menos um item com descrição e preço.");return}
+  if(!DB.clientes.some(x=>x.nome==c))DB.clientes.push({id:DB.seq++,nome:c,tel:""});
+  if(eid){const o=DB.pedidos.find(x=>x.id==eid);o.cliente=c;o.itens=itens;o.desc=parseFloat(od.value)||0;save();fecha();render();det(eid);return}
+  const id=Math.max(0,...DB.pedidos.map(o=>o.id))+1;
+  DB.pedidos.push({id,cliente:c,status:"Pendente",data:d(0),desc:parseFloat(od.value)||0,itens});save();fecha();tab="pedidos";filtro="Todos";render();det(id)}
+function det(id){const o=DB.pedidos.find(x=>x.id==id);if(!o)return;
+  sheet(`<div class="row"><h3 style="margin:0">Orçamento ${num(o)}</h3><span><button class="chip" onclick="novo(${o.id})">✏️ Editar</button> <button class="chip" onclick="fecha()">Fechar</button></span></div><p class="mu">${esc(o.cliente)} · ${dt(o.data)}</p>
+  ${o.itens.map(i=>`<div class="row"><span>${esc(i.d)} <small>× ${i.q}</small></span><b>${brl(i.p*i.q)}</b></div>`).join("")}
+  ${o.desc?`<div class="row"><small>Desconto ${o.desc}%</small></div>`:""}<div class="row" style="margin:10px 0 14px;font-size:20px"><b>Total</b><b>${brl(tot(o))}</b></div>
+  <label>Status</label><select onchange="mud(${o.id},this.value)">${ST.map(s=>`<option ${s==o.status?"selected":""}>${s}</option>`).join("")}</select>
+  <button class="btn" onclick="novo(${o.id})">Editar orçamento</button><button class="btn" style="margin-top:8px;background:var(--tx);color:var(--bg)" onclick="pdf(${o.id})">Gerar PDF</button><a class="btn" style="display:block;text-align:center;text-decoration:none;margin-top:8px;background:#1fa855;color:#fff" href="${waUrl(o)}" target="_blank" rel="noopener">Enviar por WhatsApp</a><a class="btn ghost" style="display:block;text-align:center;text-decoration:none;margin-top:8px" href="${mailUrl(o)}" target="_blank" rel="noopener">Enviar pelo Gmail</a><button class="btn ghost" style="margin-top:8px" onclick="comp(${o.id})">Copiar texto</button><button class="btn ghost danger" style="margin-top:8px" onclick="del(${o.id})">Excluir orçamento</button>`)}
+function mud(id,s){DB.pedidos.find(x=>x.id==id).status=s;save();render()}
+function del(id){if(!confirm("Excluir este orçamento?"))return;DB.pedidos=DB.pedidos.filter(x=>x.id!=id);save();fecha();render()}
+const lg=()=>EMP.logo?`<img src="${EMP.logo.u}" alt="" style="width:100%;height:100%;object-fit:contain">`:"🦁";
+function emp(aviso){sheet(`<div class="row"><h3 style="margin:0">Minha empresa</h3><button class="chip" onclick="fecha()">Fechar</button></div>${aviso?`<p class="mu">Cadastre ao menos o nome da empresa para gerar o PDF.</p>`:""}
+<label>Logo</label><div class="row" style="justify-content:flex-start;margin:6px 0 10px"><div id="lp" style="width:64px;height:64px;border:1px dashed var(--ln);border-radius:12px;display:grid;place-items:center;overflow:hidden;font-size:28px">${lg()}</div><div style="flex:1"><input type="file" accept="image/*" onchange="logo(this.files[0])" style="margin:0 0 6px"><button class="chip danger" onclick="EMP.logo=null;lp.innerHTML=lg()">Remover logo</button></div></div>
+<label>Nome da empresa</label><input id="en" value="${esc(EMP.nome)}">
+<label>CNPJ ou CPF</label><input id="ed" value="${esc(EMP.doc)}">
+<label>Telefone</label><input id="et" type="tel" value="${esc(EMP.tel)}">
+<label>E-mail</label><input id="ee" type="email" value="${esc(EMP.email)}">
+<label>Endereço</label><input id="eg" value="${esc(EMP.end)}">
+<label>Validade do orçamento (dias)</label><input id="ev" type="number" inputmode="numeric" value="${EMP.val}">
+<button class="btn" onclick="salvaEmp()">Salvar dados</button><p class="mu">${CL?"☁️ Dados salvos na nuvem"+(window.UEM?" ("+esc(window.UEM)+")":"")+".":"📴 Dados só neste aparelho."}</p><button class="btn ghost danger" onclick="sair()">Sair da conta</button>`)}
+function logo(f){if(!f)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const s=Math.min(1,300/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);const g=c.getContext("2d");g.drawImage(im,0,0,c.width,c.height);let u=c.toDataURL("image/png");if(u.length>190000){g.globalCompositeOperation="destination-over";g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);u=c.toDataURL("image/jpeg",.8)}EMP.logo={u,w:c.width,h:c.height};lp.innerHTML=lg()};im.onerror=()=>alert("Não consegui ler essa imagem. Tente um PNG ou JPG.");im.src=r.result};r.readAsDataURL(f)}
+function salvaEmp(){if(!en.value.trim()){en.focus();return}EMP={...EMP,nome:en.value.trim(),doc:ed.value.trim(),tel:et.value.trim(),email:ee.value.trim(),end:eg.value.trim(),val:parseInt(ev.value)||7};EMP.t=Date.now();try{localStorage.setItem("leao-orca-emp",JSON.stringify(EMP))}catch(e){}if(CL)CL.emp.set({emp:EMP}).then(()=>stat("☁️")).catch(()=>stat("⚠️"));fecha();render()}
+async function pdf(id){
+  const o=DB.pedidos.find(x=>x.id==id);if(!o)return;
+  if(!EMP.nome){emp(true);return}
+  if(!(window.jspdf&&jspdf.jsPDF)){alert("Não foi possível carregar o gerador de PDF. Verifique a internet e tente de novo.");return}
+  const D=new jspdf.jsPDF({unit:"mm",format:"a4"}),W=210,M=15,f=n=>brl(n).replace(/\u00a0/g," ");
+  const Y=[247,185,0],K=[36,29,5],G=[110,100,70];
+  D.setFillColor(...Y);D.rect(0,0,W,7,"F");
+  let x=M,y=16,ly;
+  if(EMP.logo){const s=Math.min(30/EMP.logo.w,30/EMP.logo.h),w=EMP.logo.w*s,h=EMP.logo.h*s;try{D.addImage(EMP.logo.u,EMP.logo.u.startsWith("data:image/jpeg")?"JPEG":"PNG",M,y,w,h)}catch(e){}x=M+w+6}
+  D.setFont("helvetica","bold");D.setFontSize(17);D.setTextColor(...K);
+  const nl=D.splitTextToSize(EMP.nome,W-M-x);D.text(nl,x,y+6);
+  D.setFont("helvetica","normal");D.setFontSize(9);D.setTextColor(...G);
+  ly=y+6+(nl.length-1)*7+6;
+  [EMP.doc,EMP.end,[EMP.tel,EMP.email].filter(Boolean).join("   |   ")].filter(Boolean).forEach(t=>{const l=D.splitTextToSize(t,W-M-x);D.text(l,x,ly);ly+=4.5*l.length});
+  y=Math.max(ly,y+32)+4;
+  D.setFillColor(...Y);D.rect(M,y,W-2*M,9,"F");D.setTextColor(...K);D.setFont("helvetica","bold");D.setFontSize(12);
+  D.text("Orçamento "+num(o),M+3,y+6.2);D.text(dt(o.data),W-M-3,y+6.2,{align:"right"});y+=17;
+  const c=DB.clientes.find(z=>z.nome==o.cliente);
+  D.setFontSize(9);D.setFont("helvetica","normal");D.setTextColor(...G);D.text("Cliente",M,y);
+  D.setFontSize(12);D.setFont("helvetica","bold");D.setTextColor(...K);D.text(o.cliente,M,y+6);
+  if(c&&c.tel){D.setFontSize(9);D.setFont("helvetica","normal");D.setTextColor(...G);D.text(c.tel,M,y+11)}
+  y+=19;
+  D.setFillColor(253,243,200);D.rect(M,y,W-2*M,8,"F");D.setFont("helvetica","bold");D.setFontSize(9);D.setTextColor(...K);
+  D.text("Descrição",M+2,y+5.3);D.text("Qtd",132,y+5.3,{align:"right"});D.text("Valor unit.",163,y+5.3,{align:"right"});D.text("Total",W-M-2,y+5.3,{align:"right"});y+=8;
+  D.setFont("helvetica","normal");D.setFontSize(10);
+  o.itens.forEach(i=>{const l=D.splitTextToSize(i.d,95),h=l.length*4.8+4;
+    if(y+h>262){D.addPage();y=20}
+    D.setTextColor(...K);D.text(l,M+2,y+5);D.text(String(i.q),132,y+5,{align:"right"});D.text(f(i.p),163,y+5,{align:"right"});D.text(f(i.p*i.q),W-M-2,y+5,{align:"right"});
+    y+=h;D.setDrawColor(236,228,196);D.line(M,y,W-M,y)});
+  y+=6;if(y>245){D.addPage();y=20}
+  const sub=o.itens.reduce((s,i)=>s+i.p*i.q,0);
+  D.setFontSize(10);D.setTextColor(...G);D.text("Subtotal",140,y);D.setTextColor(...K);D.text(f(sub),W-M-2,y,{align:"right"});y+=6;
+  if(o.desc){D.setTextColor(...G);D.text("Desconto ("+o.desc+"%)",140,y);D.setTextColor(...K);D.text("- "+f(sub-tot(o)),W-M-2,y,{align:"right"});y+=6}
+  D.setFillColor(...Y);D.rect(125,y,W-M-125,10,"F");D.setFont("helvetica","bold");D.setFontSize(12);D.setTextColor(...K);D.text("Total",128,y+6.8);D.text(f(tot(o)),W-M-3,y+6.8,{align:"right"});y+=18;
+  D.setFont("helvetica","normal");D.setFontSize(9);D.setTextColor(...G);D.text("Orçamento válido por "+EMP.val+" dias a partir de "+dt(o.data)+".",M,y);
+  const N=D.getNumberOfPages();
+  for(let p=1;p<=N;p++){D.setPage(p);D.setFontSize(8);D.setTextColor(...G);D.text(EMP.nome+(EMP.tel?"  |  "+EMP.tel:""),M,288);D.text(p+"/"+N,W-M,288,{align:"right"})}
+  const fn="Orcamento-"+num(o)+".pdf";
+  try{const dl=window.claude&&claude.use?await claude.use("downloads"):null;const b=D.output("blob");if(dl)await dl.save({filename:fn,data:b});else D.save(fn)}
+  catch(e){if(!e||e.code!="declined")alert("Não foi possível salvar o PDF aqui. Abra o app pelo link no navegador do celular e tente de novo.")}
+}
+function pick(el){const c=DB.catalogo.find(x=>x.nome==el.value);if(c)el.parentNode.querySelector(".ip").value=c.preco}
+function cat(id){const e=DB.catalogo.find(x=>x.id==id);sheet(`<h3>${e?"Editar item":"Novo item"}</h3><label>Nome</label><input id="kn" value="${e?esc(e.nome):""}"><label>Preço (R$)</label><input id="kp" type="number" inputmode="decimal" value="${e?e.preco:""}"><label>Tipo</label><select id="kt"><option ${e&&e.tipo=="Produto"?"":"selected"}>Serviço</option><option ${e&&e.tipo=="Produto"?"selected":""}>Produto</option></select><button class="btn" onclick="salvaCat(${e?e.id:0})">Salvar</button>`)}
+function salvaCat(id){const n=kn.value.trim(),p=parseFloat(kp.value);if(!n){kn.focus();return}if(!(p>=0)){kp.focus();return}if(id){const e=DB.catalogo.find(x=>x.id==id);e.nome=n;e.preco=p;e.tipo=kt.value}else DB.catalogo.push({id:DB.seq++,nome:n,preco:p,tipo:kt.value});save();fecha();render()}
+function delCat(id){if(!confirm("Excluir este item do catálogo?"))return;DB.catalogo=DB.catalogo.filter(x=>x.id!=id);save();render()}
+function stat(t){const e=document.getElementById("nv");if(e)e.textContent=t}
+function push(){if(!CL)return;clearTimeout(nt);stat("🔄");nt=setTimeout(async()=>{try{await CL.dados.set({db:DB});stat("☁️")}catch(e){stat("⚠️")}},1200)}
+async function initNuvem(){
+  try{
+    const db=await claude.use("db"),u=await claude.use("user");
+    if(!db||!u)return;
+    const id=await u.id();if(!id)return;
+    const col=db.collection("data/users/"+id),dados=col.doc("dados"),emp=col.doc("empresa");
+    stat("🔄");
+    const [a,b]=await Promise.all([dados.get(),emp.get()]);
+    const cd=a.exists&&a.data().db,ce=b.exists&&b.data().emp;
+    if(cd&&(cd.t||0)>(DB.t||0)){DB=cd;DB.catalogo=DB.catalogo||[];try{localStorage.setItem("leao-orca",JSON.stringify(DB))}catch(e){}}else await dados.set({db:DB});
+    if(ce&&(ce.t||0)>(EMP.t||0)){EMP=ce;try{localStorage.setItem("leao-orca-emp",JSON.stringify(EMP))}catch(e){}}else if(EMP.nome||EMP.logo)await emp.set({emp:EMP});
+    CL={dados,emp};stat("☁️");render();
+  }catch(e){stat("📴")}
+}
+function txt(o){return "Orçamento "+num(o)+" - Leão Orça\nCliente: "+o.cliente+"\n"+o.itens.map(i=>"• "+i.d+" ("+i.q+"x "+brl(i.p)+") = "+brl(i.p*i.q)).join("\n")+(o.desc?"\nDesconto: "+o.desc+"%":"")+"\nTotal: "+brl(tot(o))}
+function waUrl(o){const c=DB.clientes.find(x=>x.nome==o.cliente);let n=((c&&c.tel)||"").replace(/\D/g,"");if(n.length==10||n.length==11)n="55"+n;return "https://wa.me/"+n+"?text="+encodeURIComponent(txt(o))}
+function mailUrl(o){return "https://mail.google.com/mail/?view=cm&fs=1&su="+encodeURIComponent("Orçamento "+num(o))+"&body="+encodeURIComponent(txt(o))}
+async function comp(id){const o=DB.pedidos.find(x=>x.id==id);
+  const t=`Orçamento ${num(o)} - Leão Orça\nCliente: ${o.cliente}\n`+o.itens.map(i=>`• ${i.d} (${i.q}x ${brl(i.p)}) = ${brl(i.p*i.q)}`).join("\n")+(o.desc?`\nDesconto: ${o.desc}%`:"")+`\nTotal: ${brl(tot(o))}`;
+  try{if(navigator.share){await navigator.share({text:t});return}}catch(e){if(e.name=="AbortError")return}
+  try{await navigator.clipboard.writeText(t);alert("Texto copiado. Cole no WhatsApp ou onde quiser.")}catch(e){prompt("Copie o texto:",t)}}
+render();
+const VERSAO="1.1",DEV=["alexjuniorbranco047@gmail.com"];
+function isDev(){return !!window.UEM&&DEV.includes(window.UEM.toLowerCase())}
+function conta(){
+  const dev=isDev();
+  sheet(`<div class="row"><h3 style="margin:0">Minha conta</h3><button class="chip" onclick="fecha()">Fechar</button></div>
+  <p class="mu">${window.UEM?esc(window.UEM):"Sem login"}<br>${CL?"☁️ Dados salvos na nuvem":"📴 Dados só neste aparelho"}</p>
+  <button class="btn" onclick="emp()">Dados da empresa</button>
+  <button class="btn ghost danger" style="margin-top:8px" onclick="sair()">Sair da conta</button>
+  ${dev?`<div class="card" style="margin-top:16px"><b>🛠️ Modo desenvolvedor</b>
+  <p class="mu" style="margin:6px 0">Versão ${VERSAO}<br>ID: ${esc(window.UID||"-")}<br>${DB.pedidos.length} orçamentos · ${DB.clientes.length} clientes · ${DB.catalogo.length} itens no catálogo<br>Dados: ${(JSON.stringify(DB).length/1024).toFixed(1)} KB</p>
+  <button class="btn ghost" onclick="backup()">Exportar backup (JSON)</button>
+  <button class="btn ghost" style="margin-top:8px" onclick="syncAgora()">Sincronizar agora</button>
+  <button class="btn ghost danger" style="margin-top:8px" onclick="limpaLocal()">Limpar dados deste aparelho</button></div>`:""}`)}
+function backup(){const b=new Blob([JSON.stringify({DB,EMP:{...EMP,logo:EMP.logo?"(logo omitida)":null}},null,1)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="leao-orca-backup.json";a.click()}
+async function syncAgora(){if(!CL){alert("Sem conexão com a nuvem.");return}try{stat("🔄");await CL.dados.set({db:DB});if(EMP.nome||EMP.logo)await CL.emp.set({emp:EMP});stat("☁️");alert("Sincronizado.")}catch(e){stat("⚠️");alert("Erro: "+(e.code||e.message))}}
+function limpaLocal(){if(confirm("Apagar os dados deste aparelho? Os dados na nuvem continuam salvos.")){fecha();resetLocal();alert("Feito. Saia e entre de novo para baixar da nuvem.")}}
+function setCL(x){CL=x}
+function getDados(){return {DB,EMP}}
+function setDados(d,e){if(d)DB=d;DB.catalogo=DB.catalogo||[];DB.clientes=DB.clientes||[];DB.pedidos=DB.pedidos||[];DB.seq=DB.seq||1;if(e)EMP={...EMP,...e};try{localStorage.setItem("leao-orca",JSON.stringify(DB));localStorage.setItem("leao-orca-emp",JSON.stringify(EMP))}catch(x){}render()}
+function resetLocal(){DB={clientes:[],pedidos:[],seq:1,catalogo:[]};EMP={nome:"",doc:"",tel:"",email:"",end:"",val:7,logo:null};try{localStorage.removeItem("leao-orca");localStorage.removeItem("leao-orca-emp");localStorage.removeItem("leao-uid")}catch(x){}render()}
+setTimeout(()=>{const c=document.getElementById("lc");if(c&&c.style.display!="none"){c.style.display="none";document.getElementById("lf").style.display="block";document.getElementById("lm").textContent="Não foi possível conectar. Verifique a internet."}},10000);
+</script>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,sendPasswordResetEmail,signOut} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import {getFirestore,doc,getDoc,setDoc} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+const app=initializeApp({apiKey:"AIzaSyCiktArK24SrEQ9PbOAxwVEibfcWUCwMlQ",authDomain:"leao-orca.firebaseapp.com",projectId:"leao-orca",storageBucket:"leao-orca.firebasestorage.app",messagingSenderId:"919909307707",appId:"1:919909307707:web:f06d755d204485a39d131e"});
+const auth=getAuth(app),fs=getFirestore(app);
+const q=id=>document.getElementById(id),msg=t=>q("lm").textContent=t;
+const show=w=>{q("lc").style.display=w=="c"?"block":"none";q("lf").style.display=w=="f"?"block":"none";q("login").style.display="flex"};
+const errs={"auth/invalid-credential":"E-mail ou senha incorretos.","auth/invalid-email":"E-mail inválido.","auth/email-already-in-use":"Este e-mail já tem conta. Toque em Entrar.","auth/weak-password":"A senha precisa ter ao menos 6 caracteres.","auth/missing-password":"Digite a senha.","auth/network-request-failed":"Sem conexão com a internet.","auth/too-many-requests":"Muitas tentativas. Aguarde um pouco.","auth/operation-not-allowed":"O login por e-mail e senha ainda não foi ativado no Firebase.","auth/missing-email":"Digite seu e-mail."};
+const E=e=>errs[e.code]||"Erro: "+(e.code||e.message);
+window.entrar=async()=>{msg("");try{await signInWithEmailAndPassword(auth,q("le").value.trim(),q("ls").value)}catch(e){msg(E(e))}};
+window.criar=async()=>{msg("");try{await createUserWithEmailAndPassword(auth,q("le").value.trim(),q("ls").value)}catch(e){msg(E(e))}};
+window.esqueci=async()=>{const m=q("le").value.trim();if(!m){msg("Digite seu e-mail acima.");return}try{await sendPasswordResetEmail(auth,m);msg("Enviamos um e-mail para redefinir a senha.")}catch(e){msg(E(e))}};
+window.sair=async()=>{fecha();await signOut(auth);setCL(null);resetLocal()};
+onAuthStateChanged(auth,async u=>{
+  if(!u){setCL(null);window.UEM=null;show("f");stat("📴");return}
+  show("c");window.UEM=u.email;window.UID=u.uid;
+  try{
+    if(localStorage.getItem("leao-uid")!==u.uid){resetLocal();localStorage.setItem("leao-uid",u.uid)}
+    const r1=doc(fs,"users",u.uid,"data","dados"),r2=doc(fs,"users",u.uid,"data","empresa");
+    const [a,b]=await Promise.all([getDoc(r1),getDoc(r2)]);
+    const cd=a.exists()?JSON.parse(a.data().db):null,ce=b.exists()?JSON.parse(b.data().emp):null;
+    let g=getDados();
+    const nd=cd&&(cd.t||0)>(g.DB.t||0)?cd:null,ne=ce&&(ce.t||0)>(g.EMP.t||0)?ce:null;
+    if(nd||ne)setDados(nd,ne);
+    const cl={dados:{set:o=>setDoc(r1,{db:JSON.stringify(o.db)})},emp:{set:o=>setDoc(r2,{emp:JSON.stringify(o.emp)})}};
+    g=getDados();
+    if(!nd)await cl.dados.set({db:g.DB});
+    if(!ne&&(g.EMP.nome||g.EMP.logo))await cl.emp.set({emp:g.EMP});
+    setCL(cl);stat("☁️");render();q("login").style.display="none";
+  }catch(e){stat("⚠️");q("login").style.display="none";alert("Não consegui sincronizar com a nuvem ("+(e.code||e.message)+"). Seus dados continuam salvos neste aparelho.")}
+});
+</script></body></html>
