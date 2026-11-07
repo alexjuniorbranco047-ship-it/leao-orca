@@ -2,9 +2,15 @@
 <html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Leão Orça</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#f7b900">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Leão Orça">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E🦁%3C/text%3E%3C/svg%3E">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 --bg:#ffffff;--card:#fffbea;--tx:#241d05;--mu:#7a6f4a;--pr:#f7b900;--pt:#8a5f00;--on:#2a2000;--ln:#f1e6b8;--ok:#1f9d5c;--wa:#e07a1f;--bl:#2c78c9;--rd:#d4493e}
@@ -156,7 +162,7 @@ ${etqs(c).length?`<p style="margin:6px 0">${etqs(c).map(t=>`<span class="chip" s
 <div class="card" style="margin-top:6px">${H.length?H.map(g=>`<div class="row"><small>${dt(g.d)} · ${esc(g.f)} · Nº ${g.n}</small><b>${brl(g.v)}</b></div>`).join(""):`<small>Nenhum pagamento registrado.</small>`}</div>
 <button class="btn" onclick="fecha();novoPara(${i})">+ Novo orçamento</button>
 <button class="btn ghost" style="margin-top:8px" onclick="fecha();busca=DB.clientes[${i}].nome;filtro='Todos';tab='pedidos';render()">Ver orçamentos</button>
-${t?A("https://wa.me/"+w,"Abrir WhatsApp"):""}${c.mail?A("https://mail.google.com/mail/?view=cm&fs=1&to="+encodeURIComponent(c.mail),"Enviar e-mail (Gmail)"):""}${c.end?A("https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(c.end),"Ver no mapa"):""}
+${t?A("https://wa.me/"+w,"Abrir WhatsApp"):""}${c.mail?A("https://mail.google.com/mail/?view=cm&fs=1&to="+encodeURIComponent(c.mail),"Enviar e-mail (Gmail)"):""}${c.end?A("https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent(c.end)+"&travelmode=driving","🗺️ Como chegar"):""}
 <button class="btn ghost" style="margin-top:8px" onclick="novoCli(${i})">Editar cliente</button>`)}
 function ask(msg,fn,bk){window._ok=fn;window._bk=bk||fecha;sheet(`<h3>${esc(msg)}</h3><button class="btn" style="background:var(--rd);color:#fff" onclick="const f=window._ok;window._ok=null;if(f)f()">Sim, excluir</button><button class="btn ghost" style="margin-top:8px" onclick="window._bk()">Cancelar</button>`)}
 function flush(){if(!CL)return;clearTimeout(nt);CL.dados.set({db:DB}).then(()=>stat("☁️")).catch(()=>stat("⚠️"))}
@@ -198,7 +204,7 @@ function salvaEmp(){if(!en.value.trim()){en.focus();return}EMP={...EMP,nome:en.v
 async function pdf(id){
   const o=DB.pedidos.find(x=>x.id==id);if(!o)return;
   if(!EMP.nome){emp(true);return}
-  if(!(window.jspdf&&jspdf.jsPDF)){alert("Não foi possível carregar o gerador de PDF. Verifique a internet e tente de novo.");return}
+  if(!(await carregaPDF())){alert("Não foi possível carregar o gerador de PDF. Verifique a internet e tente de novo.");return}
   const D=new jspdf.jsPDF({unit:"mm",format:"a4"}),W=210,M=15,f=n=>brl(n).replace(/\u00a0/g," ");
   const Y=[247,185,0],K=[36,29,5],G=[110,100,70];
   D.setFillColor(...Y);D.rect(0,0,W,7,"F");
@@ -299,7 +305,7 @@ function ev(id){const e=DB.agenda.find(x=>x.id==id);if(!e)return;const c=DB.clie
   sheet(`<div class="row"><h3 style="margin:0">${esc(e.titulo)}</h3><button class="chip" onclick="fecha()">Fechar</button></div>
 <p class="mu">${rot(e.data)}${e.hora?" às "+esc(e.hora):""}<br>${esc(e.cliente||"Sem cliente")}${e.obs?"<br><i>"+esc(e.obs)+"</i>":""}</p>
 <button class="btn" onclick="feito(${e.id})">${e.feito?"Reabrir":"Marcar como feito"}</button>
-${A(g,"🔔 Lembrar no Google Agenda")}${t?A("https://wa.me/"+w+"?text="+encodeURIComponent(m),"Avisar cliente no WhatsApp"):""}
+${A(g,"🔔 Lembrar no Google Agenda")}${c&&c.end?A("https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent(c.end)+"&travelmode=driving","🗺️ Como chegar"):""}${t?A("https://wa.me/"+w+"?text="+encodeURIComponent(m),"Avisar cliente no WhatsApp"):""}
 <button class="btn ghost" style="margin-top:8px" onclick="novoEv(${e.id})">Editar</button>
 <button class="btn ghost danger" style="margin-top:8px" onclick="delEv(${e.id})">Excluir</button>`)}
 function delEv(id){ask("Excluir este compromisso?",()=>{DB.agenda=DB.agenda.filter(x=>x.id!=id);save();fecha();render();flush()},()=>ev(id))}
@@ -316,11 +322,12 @@ function cab(D){const W=210,M=15,Y=[247,185,0],K=[36,29,5],G=[110,100,70];let x=
   return Math.max(ly,y+32)+4}
 function barra(D,y,a,b){const W=210,M=15;D.setFillColor(247,185,0);D.rect(M,y,W-2*M,9,"F");D.setTextColor(36,29,5);D.setFont("helvetica","bold");D.setFontSize(12);D.text(a,M+3,y+6.2);D.text(b,W-M-3,y+6.2,{align:"right"})}
 function rod(D){D.setFont("helvetica","normal");D.setFontSize(8);D.setTextColor(110,100,70);D.text(EMP.nome+(EMP.tel?"  |  "+EMP.tel:""),15,288)}
-function pronto(){if(!EMP.nome){emp(true);return false}if(!(window.jspdf&&jspdf.jsPDF)){sheet(`<h3>Gerador de PDF indisponível</h3><p class="mu">Verifique a internet e tente de novo.</p><button class="btn" onclick="fecha()">Ok</button>`);return false}return true}
+function carregaPDF(){return window.jspdf?Promise.resolve(true):new Promise(r=>{const x=document.createElement("script");x.src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";x.onload=()=>r(true);x.onerror=()=>r(false);document.head.appendChild(x)})}
+async function pronto(){if(!EMP.nome){emp(true);return false}if(!(await carregaPDF())){sheet(`<h3>Gerador de PDF indisponível</h3><p class="mu">Verifique a internet e tente de novo.</p><button class="btn" onclick="fecha()">Ok</button>`);return false}return true}
 async function entrega(D,fn,msg){const b=D.output("blob");
   try{const f=new File([b],fn,{type:"application/pdf"});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:fn,text:msg});return}}catch(e){if(e&&e.name=="AbortError")return}
   try{const dl=window.claude&&claude.use?await claude.use("downloads"):null;if(dl)await dl.save({filename:fn,data:b});else D.save(fn)}catch(e){if(!e||e.code!="declined")sheet(`<h3>Não consegui salvar o PDF</h3><p class="mu">Abra o app pelo link no navegador do celular e tente de novo.</p><button class="btn" onclick="fecha()">Ok</button>`)}}
-async function recibo(id,i){const o=DB.pedidos.find(x=>x.id==id),g=o&&(o.pags||[])[i];if(!g||!pronto())return;
+async function recibo(id,i){const o=DB.pedidos.find(x=>x.id==id),g=o&&(o.pags||[])[i];if(!g||!(await pronto()))return;
   const D=new jspdf.jsPDF({unit:"mm",format:"a4"}),W=210,M=15,K=[36,29,5],G=[110,100,70];let y=cab(D);
   barra(D,y,"Recibo nº "+num(o)+"-"+(i+1),dt(g.d));y+=24;
   D.setFont("helvetica","bold");D.setFontSize(28);D.setTextColor(...K);D.text(fm(g.v),W/2,y,{align:"center"});y+=14;
@@ -331,7 +338,7 @@ async function recibo(id,i){const o=DB.pedidos.find(x=>x.id==id),g=o&&(o.pags||[
   D.setTextColor(...G);D.text(sal>0?"Saldo restante do orçamento: "+fm(sal)+".":"Pagamento quitado: o orçamento foi totalmente pago.",M,y);y+=40;
   D.setTextColor(...K);D.text((EMP.cid?EMP.cid+", ":"")+dt(g.d),M,y);y+=24;D.setDrawColor(...K);D.line(W/2-45,y,W/2+45,y);D.setFontSize(10);D.text(EMP.nome,W/2,y+5,{align:"center"});if(EMP.doc){D.setTextColor(...G);D.text(EMP.doc,W/2,y+10,{align:"center"})}
   rod(D);await entrega(D,"Recibo-"+num(o)+"-"+(i+1)+".pdf","Recibo "+num(o)+"-"+(i+1)+" - "+EMP.nome)}
-async function osPDF(id){const o=DB.pedidos.find(x=>x.id==id);if(!o||!pronto())return;
+async function osPDF(id){const o=DB.pedidos.find(x=>x.id==id);if(!o||!(await pronto()))return;
   const D=new jspdf.jsPDF({unit:"mm",format:"a4"}),W=210,M=15,K=[36,29,5],G=[110,100,70];let y=cab(D);
   barra(D,y,"Ordem de serviço nº "+num(o),dt(o.data));y+=17;
   const c=DB.clientes.find(z=>z.nome==o.cliente);D.setFontSize(9);D.setFont("helvetica","normal");D.setTextColor(...G);D.text("Cliente",M,y);
@@ -347,7 +354,7 @@ async function osPDF(id){const o=DB.pedidos.find(x=>x.id==id);if(!o||!pronto())r
 function calIcon(){const x=new Date(),m=x.toLocaleDateString("pt-BR",{month:"short"}).replace(".","").toUpperCase();return `<span class="cal"><i><em>${m}</em></i><b>${x.getDate()}</b></span>`}
 function migra(){DB.pedidos.forEach(o=>{if(o.status=="Aguardando aprovação")o.status="Pendente";if(o.status=="Aguardando pagamento"){o.status="Concluído";o.pags=o.pags||[]}})}
 function maisMenu(){const B=(a,t)=>`<button class="btn ghost" style="margin-top:8px;text-align:left" onclick="${a}">${t}</button>`;
-  sheet(`<div class="row"><h3 style="margin:0">Mais</h3><button class="chip" onclick="fecha()">Fechar</button></div>${B("fecha();tab='catalogo';render();scrollTo(0,0)","🧰 Catálogo de serviços e produtos")}${B("fecha();tab='gestao';render();scrollTo(0,0)","📊 Gestão financeira")}${B("emp()","🏢 Dados da empresa e Pix")}${B("conta()","👤 Minha conta")}<a class="btn ghost" style="display:block;text-align:left;text-decoration:none;margin-top:8px" href="legal.html" target="_blank" rel="noopener">📄 Termos, privacidade e suporte</a>`)}
+  sheet(`<div class="row"><h3 style="margin:0">Mais</h3><button class="chip" onclick="fecha()">Fechar</button></div>${B("fecha();tab='catalogo';render();scrollTo(0,0)","🧰 Catálogo de serviços e produtos")}${B("fecha();tab='gestao';render();scrollTo(0,0)","📊 Gestão financeira")}${B("emp()","🏢 Dados da empresa e Pix")}${B("conta()","👤 Minha conta")}${window._inst?B("instala()","📲 Instalar aplicativo"):""}<a class="btn ghost" style="display:block;text-align:left;text-decoration:none;margin-top:8px" href="legal.html" target="_blank" rel="noopener">📄 Termos, privacidade e suporte</a>`)}
 function boasVindas(){sheet(`<h3>Bem-vindo ao Leão Orça 🦁</h3><p class="mu">Configure sua empresa em 1 minuto. Esses dados aparecem nos seus PDFs e no Pix. Dá para mudar depois em Mais.</p>
 <label>Logo (opcional)</label><div class="row" style="justify-content:flex-start;margin:6px 0 10px"><div id="lp" style="width:64px;height:64px;border:1px dashed var(--ln);border-radius:12px;display:grid;place-items:center;overflow:hidden;font-size:28px">${lg()}</div><input type="file" accept="image/*" onchange="logo(this.files[0])" style="margin:0;flex:1"></div>
 <label>Nome da empresa</label><input id="bn"><label>Telefone / WhatsApp</label><input id="bt" type="tel"><label>Chave Pix (opcional)</label><input id="bk" placeholder="CPF, CNPJ, e-mail, +55DDDNÚMERO ou chave aleatória"><label>Cidade (para o Pix)</label><input id="bc">
@@ -357,15 +364,19 @@ function pulaBV(){EMP.skip=true;try{localStorage.setItem("leao-orca-emp",JSON.st
 const PLANOS=[{n:"Prata",e:"🥈",p:9.99,i:["Até 30 orçamentos por mês","Clientes e catálogo","PDF com a sua logo","Recibo em PDF"]},{n:"Ouro",e:"🥇",p:29.99,d:1,i:["Orçamentos ilimitados","Pix copia e cola","Agenda de serviços","Ordem de serviço e pagamentos"]},{n:"Diamante",e:"💎",p:49.99,i:["Tudo do Ouro","Gestão financeira completa","Backup dos seus dados","Suporte prioritário"]}];
 function planos(){sheet(`<div class="row"><h3 style="margin:0">Planos e preços</h3><button class="chip" onclick="fecha()">Fechar</button></div><p class="mu">Escolha o plano ideal para o seu negócio.</p>${PLANOS.map(x=>`<div class="card" style="${x.d?"border:2px solid var(--pr)":""}"><div class="row"><b style="font-size:18px">${x.e} ${x.n}</b>${x.d?`<span class="chip on" style="padding:2px 10px;font-size:12px">Mais escolhido</span>`:""}</div><div style="font-size:26px;font-weight:800;margin:6px 0">${fm(x.p)}<small> /mês</small></div>${x.i.map(t=>`<div class="mu" style="margin:2px 0">✓ ${t}</div>`).join("")}<button class="btn" style="margin-top:10px" onclick="assinar('${x.n}')">Quero o ${x.n}</button></div>`).join("")}`)}
 function assinar(n){const x=PLANOS.find(y=>y.n==n);sheet(`<h3>${x.e} Plano ${x.n} · ${fm(x.p)}/mês</h3><p class="mu">A assinatura por Pix ou cartão ainda está sendo preparada. Em breve você poderá contratar por aqui.</p><button class="btn ghost" onclick="planos()">Voltar aos planos</button>`)}
-function codConv(){if(!DB.conv){DB.conv=Math.random().toString(36).slice(2,8).toUpperCase();save()}return DB.conv}
-function convite(){const c=codConv(),link="https://alexjuniorbranco047-ship-it.github.io/leao-orca/",m="Estou usando o Leão Orça para fazer orçamentos, recibos e agenda do meu negócio. Experimente! Use o meu código "+c+" ao se cadastrar: "+link;
+const novoCod=()=>{const A="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";let c;do{c="";for(let i=0;i<6;i++)c+=A[Math.floor(Math.random()*A.length)]}while((DB.convs||[]).some(x=>x.c==c));return c};
+function codConv(){if(!DB.conv){DB.conv=novoCod();save()}return DB.conv}
+const msgConv=c=>"Estou usando o Leão Orça para fazer orçamentos, recibos e agenda do meu negócio. Experimente! Use o meu código "+c+" ao se cadastrar: https://alexjuniorbranco047-ship-it.github.io/leao-orca/";
+function convite(){const c=codConv(),L=(DB.convs||[]).slice(-8).reverse();
   sheet(`<div class="row"><h3 style="margin:0">Convidar amigos</h3><button class="chip" onclick="fecha()">Fechar</button></div>
-<p class="mu">🎁 Ganhe <b>1 mês grátis</b> para cada amigo que se cadastrar com o seu código.</p>
-<div class="card" style="text-align:center"><small>Seu código</small><div style="font-size:30px;font-weight:800;letter-spacing:4px">${c}</div></div>
-<input id="mc" readonly value="${esc(m)}" onclick="this.select()">
-<button class="btn" onclick="copiaConv(this)">Copiar convite</button>
-<a class="btn ghost" style="display:block;text-align:center;text-decoration:none;margin-top:8px" href="https://wa.me/?text=${encodeURIComponent(m)}" target="_blank" rel="noopener">Enviar pelo WhatsApp</a>`)}
-async function copiaConv(b){try{await navigator.clipboard.writeText(mc.value);b.textContent="Copiado ✓"}catch(e){mc.select();b.textContent="Segure sobre o texto e copie"}}
+<p class="mu">🎁 Ganhe <b>1 mês grátis</b> quando um amigo se cadastrar com o seu código e <b>assinar um plano pago</b>. Cada convite usa um código novo.</p>
+<div class="card" style="text-align:center"><small>Código deste convite</small><div style="font-size:30px;font-weight:800;letter-spacing:4px">${c}</div></div>
+<button class="btn" onclick="envConv('wa')">Enviar pelo WhatsApp</button>
+<button class="btn ghost" style="margin-top:8px" onclick="envConv('copia')">Copiar convite</button>
+${L.length?`<p class="mu" style="margin:14px 0 4px">Convites enviados</p><div class="card">${L.map(x=>`<div class="row"><small>${dt(x.d)} · ${x.c}</small><small>Aguardando assinatura</small></div>`).join("")}</div>`:""}`)}
+async function envConv(modo){const c=DB.conv,m=msgConv(c);DB.convs=DB.convs||[];DB.convs.push({c,d:d(0)});DB.conv=novoCod();save();flush();
+  if(modo=="wa"){window.open("https://wa.me/?text="+encodeURIComponent(m),"_blank")}else{try{await navigator.clipboard.writeText(m)}catch(e){}}
+  sheet(`<h3>${modo=="wa"?"Convite enviado":"Convite copiado"} ✓</h3><p class="mu">O código <b>${c}</b> foi usado neste convite. Para o próximo amigo, o app gerou um código novo.</p><input readonly value="${esc(m)}" onclick="this.select()"><button class="btn" onclick="convite()">Convidar outro amigo</button><button class="btn ghost" style="margin-top:8px" onclick="fecha()">Fechar</button>`)}
 function txt(o){return "Orçamento "+num(o)+" - Leão Orça\nCliente: "+o.cliente+"\n"+o.itens.map(i=>"• "+i.d+" ("+i.q+"x "+brl(i.p)+") = "+brl(i.p*i.q)).join("\n")+(o.desc?"\nDesconto: "+o.desc+"%":"")+"\nTotal: "+brl(tot(o))}
 function waUrl(o){const c=DB.clientes.find(x=>x.nome==o.cliente);let n=((c&&c.tel)||"").replace(/\D/g,"");if(n.length==10||n.length==11)n="55"+n;return "https://wa.me/"+n+"?text="+encodeURIComponent(txt(o))}
 function mailUrl(o){return "https://mail.google.com/mail/?view=cm&fs=1&su="+encodeURIComponent("Orçamento "+num(o))+"&body="+encodeURIComponent(txt(o))}
@@ -374,6 +385,13 @@ async function comp(id){const o=DB.pedidos.find(x=>x.id==id);
   try{if(navigator.share){await navigator.share({text:t});return}}catch(e){if(e.name=="AbortError")return}
   try{await navigator.clipboard.writeText(t);alert("Texto copiado. Cole no WhatsApp ou onde quiser.")}catch(e){prompt("Copie o texto:",t)}}
 render();
+function instala(){const e=window._inst;if(e){window._inst=null;fecha();e.prompt()}}
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();window._inst=e});
+window.addEventListener("appinstalled",()=>{window._inst=null});
+window.addEventListener("offline",()=>stat("📴"));
+if("serviceWorker" in navigator){const prim=!navigator.serviceWorker.controller;navigator.serviceWorker.register("sw.js").catch(()=>{});if(prim)navigator.serviceWorker.addEventListener("controllerchange",()=>{if(!sessionStorage.getItem("rl")){sessionStorage.setItem("rl","1");location.reload()}})}
+try{if(localStorage.getItem("leao-uid"))document.getElementById("login").style.display="none"}catch(e){}
+if("serviceWorker" in navigator)navigator.serviceWorker.addEventListener("message",e=>{if(e.data=="nova"&&!document.getElementById("nvv")){const t=document.createElement("div");t.id="nvv";t.style.cssText="position:fixed;left:12px;right:12px;bottom:84px;z-index:40;background:var(--tx);color:var(--bg);border-radius:14px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px";t.innerHTML='<span>Nova versão disponível</span><button class="chip" style="background:var(--pr);color:var(--on);border:0" onclick="location.reload()">Atualizar</button>';document.body.appendChild(t)}});
 function setCL(x){CL=x}
 function getDados(){return {DB,EMP}}
 function setDados(d,e){if(d)DB=d;DB.catalogo=DB.catalogo||[];DB.clientes=DB.clientes||[];DB.pedidos=DB.pedidos||[];DB.agenda=DB.agenda||[];DB.seq=DB.seq||1;migra();if(e)EMP={...EMP,...e};try{localStorage.setItem("leao-orca",JSON.stringify(DB));localStorage.setItem("leao-orca-emp",JSON.stringify(EMP))}catch(x){}render()}
@@ -392,7 +410,7 @@ const errs={"auth/invalid-credential":"E-mail ou senha incorretos.","auth/wrong-
 const E=e=>errs[e.code]||"Erro: "+(e.code||e.message);
 window.entrar=async()=>{msg("");try{await signInWithEmailAndPassword(auth,q("le").value.trim(),q("ls").value)}catch(e){msg(E(e))}};
 window.criar=async()=>{msg("");if(!q("lt").checked){msg("Marque que leu e aceita os Termos e a Política de Privacidade para criar a conta.");return}
-  try{const c=await createUserWithEmailAndPassword(auth,q("le").value.trim(),q("ls").value);try{await setDoc(doc(fs,"users",c.user.uid,"data","aceite"),{em:new Date().toISOString(),termos:"2026-11-05"})}catch(e){}}catch(e){msg(E(e))}};
+  try{const c=await createUserWithEmailAndPassword(auth,q("le").value.trim(),q("ls").value);try{await setDoc(doc(fs,"users",c.user.uid,"data","aceite"),{em:new Date().toISOString(),termos:"2026-11-06"})}catch(e){}}catch(e){msg(E(e))}};
 window.esqueci=async()=>{const m=q("le").value.trim();if(!m){msg("Digite seu e-mail acima.");return}try{await sendPasswordResetEmail(auth,m);msg("Enviamos um e-mail para redefinir a senha.")}catch(e){msg(E(e))}};
 window.sair=async()=>{fecha();await signOut(auth);setCL(null);resetLocal()};
 window.excluirConta=()=>{sheet(`<h3>Excluir minha conta</h3><p class="mu">Isso apaga <b>para sempre</b> a sua conta e todos os seus dados: clientes, orçamentos, pagamentos, agenda e dados da empresa. Não dá para desfazer. Se quiser, use antes “Exportar meus dados”.</p><label>Digite sua senha para confirmar</label><input id="xs" type="password" autocomplete="current-password"><p id="xm" style="color:var(--rd);min-height:20px;font-size:14px;margin:0 0 8px"></p><button class="btn" style="background:var(--rd);color:#fff" onclick="confirmaExcluir()">Excluir definitivamente</button><button class="btn ghost" style="margin-top:8px" onclick="conta()">Cancelar</button>`)};
@@ -401,23 +419,38 @@ window.confirmaExcluir=async()=>{const u=auth.currentUser;if(!u)return;q("xm").t
     await deleteDoc(doc(fs,"users",u.uid,"data","dados"));await deleteDoc(doc(fs,"users",u.uid,"data","empresa"));try{await deleteDoc(doc(fs,"users",u.uid,"data","aceite"))}catch(e){}
     await deleteUser(u);setCL(null);resetLocal();fecha();setTimeout(()=>{show("f");msg("Sua conta e seus dados foram excluídos.")},400)}
   catch(e){q("xm").textContent=E(e)}};
-onAuthStateChanged(auth,async u=>{
-  if(!u){setCL(null);window.UEM=null;show("f");stat("📴");return}
-  show("c");window.UEM=u.email;window.UID=u.uid;
+const comTimeout=(p,ms)=>Promise.race([p,new Promise((_,r)=>setTimeout(()=>r({code:"timeout"}),ms))]);
+let sincronizando=false;
+async function sincroniza(u,quieto){
+  if(sincronizando)return false;sincronizando=true;
   try{
-    if(localStorage.getItem("leao-uid")!==u.uid){resetLocal();localStorage.setItem("leao-uid",u.uid)}
     const r1=doc(fs,"users",u.uid,"data","dados"),r2=doc(fs,"users",u.uid,"data","empresa");
-    const [a,b]=await Promise.all([getDoc(r1),getDoc(r2)]);
+    const [a,b]=await comTimeout(Promise.all([getDoc(r1),getDoc(r2)]),8000);
     const cd=a.exists()?JSON.parse(a.data().db):null,ce=b.exists()?JSON.parse(b.data().emp):null;
     let g=getDados();
     const nd=cd&&(cd.t||0)>(g.DB.t||0)?cd:null,ne=ce&&(ce.t||0)>(g.EMP.t||0)?ce:null;
     if(nd||ne)setDados(nd,ne);
     const cl={dados:{set:o=>setDoc(r1,{db:JSON.stringify(o.db)})},emp:{set:o=>setDoc(r2,{emp:JSON.stringify(o.emp)})}};
     g=getDados();
-    if(!nd)await cl.dados.set({db:g.DB});
-    if(!ne&&(g.EMP.nome||g.EMP.logo))await cl.emp.set({emp:g.EMP});
-    setCL(cl);stat("☁️");render();q("login").style.display="none";
-    if(!g.EMP.nome&&!g.EMP.skip)boasVindas();
-  }catch(e){stat("⚠️");q("login").style.display="none";alert("Não consegui sincronizar com a nuvem ("+(e.code||e.message)+"). Seus dados continuam salvos neste aparelho.")}
+    if(!nd)await comTimeout(cl.dados.set({db:g.DB}),8000);
+    if(!ne&&(g.EMP.nome||g.EMP.logo))await comTimeout(cl.emp.set({emp:g.EMP}),8000);
+    setCL(cl);stat("☁️");render();return true;
+  }catch(e){
+    const semNet=!navigator.onLine||e.code=="unavailable"||e.code=="timeout";
+    stat(semNet?"📴":"⚠️");
+    if(!semNet&&!quieto)alert("Não consegui sincronizar com a nuvem ("+(e.code||e.message)+"). Seus dados continuam salvos neste aparelho.");
+    return false;
+  }finally{sincronizando=false}
+}
+onAuthStateChanged(auth,async u=>{
+  if(!u){setCL(null);window.UEM=null;show("f");stat("📴");return}
+  window.UEM=u.email;window.UID=u.uid;
+  let local=false;try{local=localStorage.getItem("leao-uid")===u.uid}catch(e){}
+  if(!local){show("c");try{resetLocal();localStorage.setItem("leao-uid",u.uid)}catch(e){}}
+  const sync=navigator.onLine?sincroniza(u):(stat("📴"),Promise.resolve());
+  const fim=()=>{const g=getDados();if(!g.EMP.nome&&!g.EMP.skip)boasVindas()};
+  if(local){q("login").style.display="none";render();sync.then(fim)}
+  else{await sync;q("login").style.display="none";render();fim()}
 });
+window.addEventListener("online",()=>{if(auth.currentUser)sincroniza(auth.currentUser,true)});
 </script></body></html>
