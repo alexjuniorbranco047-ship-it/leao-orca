@@ -80,7 +80,7 @@ nav .cal{display:flex;flex-direction:column;width:26px;height:24px;margin:0 auto
 </div></div></div>
 <script>
 const ST=["Pendente","Aprovado","Em andamento","Concluído"];
-const COR={"Pendente":"var(--wa)","Aprovado":"var(--bl)","Em andamento":"var(--bl)","Concluído":"var(--ok)"};
+const COR={"Pendente":"var(--wa)","Aprovado":"#8b5cf6","Em andamento":"var(--bl)","Concluído":"var(--ok)"};
 const brl=n=>n.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const tot=o=>Math.max(0,o.itens.reduce((s,i)=>s+i.p*i.q,0)*(1-(o.desc||0)/100));
@@ -101,6 +101,8 @@ let EMP={nome:"",doc:"",tel:"",email:"",end:"",val:7,logo:null};
 try{const s=JSON.parse(localStorage.getItem("leao-orca-emp"));if(s)EMP={...EMP,...s}}catch(e){}
 let tab="inicio",filtro="Todos",busca="";
 let ftag="Todos",bcli="",fag="Próximos";
+const CAG={"Hoje":"var(--bl)","Atrasados":"var(--rd)","Concluídos":"var(--ok)"};
+aplicaTema();
 const TABS=[["inicio","🏠","Início"],["pedidos","📋","Orçamentos"],["clientes","👥","Clientes"],["agenda","CAL","Agenda"],["mais","☰","Mais"]];
 const num=o=>String(o.id).padStart(3,"0")+"-"+o.data.slice(0,4);
 
@@ -116,22 +118,22 @@ inicio(){
   const ab=DB.pedidos.filter(o=>o.status!="Concluído");
   const rec=DB.pedidos.filter(o=>["Aprovado","Em andamento","Concluído"].includes(o.status)).reduce((s,o)=>s+falta(o),0);
   return `<div class="card big"><small>A receber</small><b>${brl(rec)}</b><small>${ab.length} orçamento(s) em aberto</small></div>
-  <div class="grid"><button class="card tile" onclick="tab='pedidos';filtro='Pendente';render()"><small>Pendentes</small><b>${DB.pedidos.filter(o=>o.status=="Pendente").length}</b></button>
-  <button class="card tile" onclick="tab='pedidos';filtro='Em andamento';render()"><small>Em andamento</small><b>${DB.pedidos.filter(o=>o.status=="Em andamento").length}</b></button>
+  <div class="grid"><button class="card tile" onclick="tab='pedidos';filtro='Pendente';render()"><small><span class="dot" style="background:var(--wa)"></span>Pendentes</small><b>${DB.pedidos.filter(o=>o.status=="Pendente").length}</b></button>
+  <button class="card tile" onclick="tab='pedidos';filtro='Em andamento';render()"><small><span class="dot" style="background:var(--bl)"></span>Em andamento</small><b>${DB.pedidos.filter(o=>o.status=="Em andamento").length}</b></button>
   <button class="card tile" onclick="tab='clientes';render()"><small>Clientes</small><b>${DB.clientes.length}</b></button>
-  <button class="card tile" onclick="tab='gestao';render()"><small>Concluídos</small><b>${DB.pedidos.filter(o=>o.status=="Concluído").length}</b></button></div>
+  <button class="card tile" onclick="tab='gestao';render()"><small><span class="dot" style="background:var(--ok)"></span>Concluídos</small><b>${DB.pedidos.filter(o=>o.status=="Concluído").length}</b></button></div>
   ${agHoje()}${aniv()}<h3>Últimos orçamentos</h3>${lista([...DB.pedidos].reverse().slice(0,3))}<div class="grid" style="margin-top:6px"><button class="card tile" onclick="planos()"><span style="font-size:26px">⭐</span><b style="font-size:16px;margin-top:6px">Ver planos e preços</b></button><button class="card tile" onclick="convite()"><span style="font-size:26px">🎁</span><b style="font-size:16px;margin-top:6px">Convidar amigos</b></button></div>`},
 pedidos(){
   let ps=[...DB.pedidos].reverse().filter(o=>(filtro=="Todos"||o.status==filtro)&&o.cliente.toLowerCase().includes(busca.toLowerCase()));
   return `<input placeholder="Buscar por cliente" value="${esc(busca)}" oninput="busca=this.value;lst()">
-  <div class="chips">${["Todos",...ST].map(s=>`<button class="chip ${filtro==s?"on":""}" onclick="filtro='${s}';render()">${s}</button>`).join("")}</div><div id="lst">${lista(ps)}</div>`},
+  <div class="chips">${["Todos",...ST].map(s=>{const c=COR[s],on=filtro==s;return `<button class="chip ${on&&!c?"on":""}" style="${c?(on?"background:"+c+";border-color:"+c+";color:#fff":"border-color:"+c):""}" onclick="filtro='${s}';render()">${c&&!on?`<span class="dot" style="background:${c}"></span>`:""}${s}</button>`}).join("")}</div><div id="lst">${lista(ps)}</div>`},
 clientes(){const tags=[...new Set(DB.clientes.flatMap(etqs))];return `<button class="btn ghost" style="margin-bottom:10px" onclick="novoCli()">+ Novo cliente</button><input placeholder="Buscar cliente" value="${esc(bcli)}" oninput="bcli=this.value;lcli()">${tags.length?`<div class="chips">${["Todos",...tags].map(t=>`<button class="chip ${ftag==t?"on":""}" onclick="ftag='${t}';render()">${esc(t)}</button>`).join("")}</div>`:""}<div id="lcli">${cliLista(filtraCli())}</div>`},
 catalogo(){return `<button class="btn ghost" style="margin-bottom:10px" onclick="cat()">+ Novo serviço ou produto</button>`+(DB.catalogo.length?[...DB.catalogo].sort((a,b)=>a.nome.localeCompare(b.nome)).map(c=>`<div class="card"><div class="row"><div><b>${esc(c.nome)}</b><br><small>${c.tipo}</small></div><b>${brl(c.preco)}</b></div><div class="row" style="justify-content:flex-end"><button class="chip" onclick="cat(${c.id})">Editar</button><button class="chip danger" onclick="delCat(${c.id})">Excluir</button></div></div>`).join(""):`<div class="empty">Cadastre seus serviços e produtos com preço.<br>Ao criar um orçamento, é só escolher da lista e o preço entra sozinho.</div>`)},
 agenda(){const h=hoje(),E=[...DB.agenda].sort((a,b)=>(a.data+(a.hora||"")).localeCompare(b.data+(b.hora||"")));
   const F={"Próximos":e=>!e.feito&&e.data>=h,"Hoje":e=>!e.feito&&e.data==h,"Atrasados":e=>!e.feito&&e.data<h,"Concluídos":e=>e.feito};
   let ult="";const rows=E.filter(F[fag]||F["Próximos"]).map(e=>{const c=e.data!=ult?(ult=e.data,`<p class="mu" style="margin:14px 0 6px;font-weight:700">${rot(e.data)}</p>`):"";return c+evCard(e)}).join("");
   const at=E.filter(F["Atrasados"]).length;
-  return `<button class="btn ghost" style="margin-bottom:10px" onclick="novoEv()">+ Novo compromisso</button><div class="chips">${Object.keys(F).map(k=>`<button class="chip ${fag==k?"on":""}" onclick="fag='${k}';render()">${k}${k=="Atrasados"&&at?" ("+at+")":""}</button>`).join("")}</div>${rows||`<div class="empty">Nada por aqui.<br>Toque em “+ Novo compromisso” para marcar um serviço.</div>`}`},
+  return `<button class="btn ghost" style="margin-bottom:10px" onclick="novoEv()">+ Novo compromisso</button><div class="chips">${Object.keys(F).map(k=>`<button class="chip ${fag==k&&!CAG[k]?"on":""}" style="${CAG[k]?(fag==k?"background:"+CAG[k]+";border-color:"+CAG[k]+";color:#fff":"border-color:"+CAG[k]):""}" onclick="fag='${k}';render()">${CAG[k]&&fag!=k?`<span class="dot" style="background:${CAG[k]}"></span>`:""}${k}${k=="Atrasados"&&at?" ("+at+")":""}</button>`).join("")}</div>${rows||`<div class="empty">Nada por aqui.<br>Toque em “+ Novo compromisso” para marcar um serviço.</div>`}`},
 gestao(){
   const s=x=>DB.pedidos.filter(o=>x.includes(o.status)).reduce((a,o)=>a+tot(o),0);
   const r=[["Recebido",DB.pedidos.reduce((a,o)=>a+pago(o),0),"var(--ok)"],["A receber",DB.pedidos.filter(o=>["Aprovado","Em andamento","Concluído"].includes(o.status)).reduce((a,o)=>a+falta(o),0),"var(--bl)"],["Em negociação",s(["Pendente"]),"var(--wa)"]];
@@ -245,7 +247,7 @@ function cat(id){const e=DB.catalogo.find(x=>x.id==id);sheet(`<h3>${e?"Editar it
 function salvaCat(id){const n=kn.value.trim(),p=parseFloat(kp.value);if(!n){kn.focus();return}if(!(p>=0)){kp.focus();return}if(id){const e=DB.catalogo.find(x=>x.id==id);e.nome=n;e.preco=p;e.tipo=kt.value}else DB.catalogo.push({id:DB.seq++,nome:n,preco:p,tipo:kt.value});save();fecha();render()}
 function delCat(id){ask("Excluir este item do catálogo?",()=>{DB.catalogo=DB.catalogo.filter(x=>x.id!=id);save();fecha();render();flush()})}
 function stat(t){const e=document.getElementById("nv");if(e)e.textContent=t}
-function push(){if(!CL)return;clearTimeout(nt);stat("🔄");nt=setTimeout(async()=>{try{await CL.dados.set({db:DB});stat("☁️")}catch(e){stat("⚠️")}},1200)}
+function push(){if(!CL)return;clearTimeout(nt);stat("🔄");window._sujo=1;nt=setTimeout(async()=>{window._sujo=0;try{await CL.dados.set({db:DB});stat("☁️")}catch(e){stat("⚠️")}},5000)}
 async function initNuvem(){
   try{
     const db=await claude.use("db"),u=await claude.use("user");
@@ -354,7 +356,7 @@ async function osPDF(id){const o=DB.pedidos.find(x=>x.id==id);if(!o||!(await pro
 function calIcon(){const x=new Date(),m=x.toLocaleDateString("pt-BR",{month:"short"}).replace(".","").toUpperCase();return `<span class="cal"><i><em>${m}</em></i><b>${x.getDate()}</b></span>`}
 function migra(){DB.pedidos.forEach(o=>{if(o.status=="Aguardando aprovação")o.status="Pendente";if(o.status=="Aguardando pagamento"){o.status="Concluído";o.pags=o.pags||[]}})}
 function maisMenu(){const B=(a,t)=>`<button class="btn ghost" style="margin-top:8px;text-align:left" onclick="${a}">${t}</button>`;
-  sheet(`<div class="row"><h3 style="margin:0">Mais</h3><button class="chip" onclick="fecha()">Fechar</button></div>${B("fecha();tab='catalogo';render();scrollTo(0,0)","🧰 Catálogo de serviços e produtos")}${B("fecha();tab='gestao';render();scrollTo(0,0)","📊 Gestão financeira")}${B("emp()","🏢 Dados da empresa e Pix")}${B("conta()","👤 Minha conta")}${window._inst?B("instala()","📲 Instalar aplicativo"):""}<a class="btn ghost" style="display:block;text-align:left;text-decoration:none;margin-top:8px" href="legal.html" target="_blank" rel="noopener">📄 Termos, privacidade e suporte</a>`)}
+  sheet(`<div class="row"><h3 style="margin:0">Mais</h3><button class="chip" onclick="fecha()">Fechar</button></div>${B("fecha();tab='catalogo';render();scrollTo(0,0)","🧰 Catálogo de serviços e produtos")}${B("fecha();tab='gestao';render();scrollTo(0,0)","📊 Gestão financeira")}${B("emp()","🏢 Dados da empresa e Pix")}${B("conta()","👤 Minha conta")}${B("trocaTema()","🌓 Tema: "+nomeTema())}${window._inst?B("instala()","📲 Instalar aplicativo"):""}<a class="btn ghost" style="display:block;text-align:left;text-decoration:none;margin-top:8px" href="legal.html" target="_blank" rel="noopener">📄 Termos, privacidade e suporte</a>`)}
 function boasVindas(){sheet(`<h3>Bem-vindo ao Leão Orça 🦁</h3><p class="mu">Configure sua empresa em 1 minuto. Esses dados aparecem nos seus PDFs e no Pix. Dá para mudar depois em Mais.</p>
 <label>Logo (opcional)</label><div class="row" style="justify-content:flex-start;margin:6px 0 10px"><div id="lp" style="width:64px;height:64px;border:1px dashed var(--ln);border-radius:12px;display:grid;place-items:center;overflow:hidden;font-size:28px">${lg()}</div><input type="file" accept="image/*" onchange="logo(this.files[0])" style="margin:0;flex:1"></div>
 <label>Nome da empresa</label><input id="bn"><label>Telefone / WhatsApp</label><input id="bt" type="tel"><label>Chave Pix (opcional)</label><input id="bk" placeholder="CPF, CNPJ, e-mail, +55DDDNÚMERO ou chave aleatória"><label>Cidade (para o Pix)</label><input id="bc">
@@ -377,6 +379,10 @@ ${L.length?`<p class="mu" style="margin:14px 0 4px">Convites enviados</p><div cl
 async function envConv(modo){const c=DB.conv,m=msgConv(c);DB.convs=DB.convs||[];DB.convs.push({c,d:d(0)});DB.conv=novoCod();save();flush();
   if(modo=="wa"){window.open("https://wa.me/?text="+encodeURIComponent(m),"_blank")}else{try{await navigator.clipboard.writeText(m)}catch(e){}}
   sheet(`<h3>${modo=="wa"?"Convite enviado":"Convite copiado"} ✓</h3><p class="mu">O código <b>${c}</b> foi usado neste convite. Para o próximo amigo, o app gerou um código novo.</p><input readonly value="${esc(m)}" onclick="this.select()"><button class="btn" onclick="convite()">Convidar outro amigo</button><button class="btn ghost" style="margin-top:8px" onclick="fecha()">Fechar</button>`)}
+function temaAtual(){try{return localStorage.getItem("leao-tema")||"auto"}catch(e){return"auto"}}
+function nomeTema(){return{auto:"Automático",claro:"Claro",escuro:"Escuro"}[temaAtual()]||"Automático"}
+function aplicaTema(){const t=temaAtual(),r=document.documentElement;if(t=="claro")r.setAttribute("data-theme","light");else if(t=="escuro")r.setAttribute("data-theme","dark");else r.removeAttribute("data-theme");const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=(t=="escuro"||(t=="auto"&&matchMedia("(prefers-color-scheme: dark)").matches))?"#14110a":"#f7b900"}
+function trocaTema(){const n={auto:"claro",claro:"escuro",escuro:"auto"}[temaAtual()]||"claro";try{localStorage.setItem("leao-tema",n)}catch(e){}aplicaTema();maisMenu()}
 function txt(o){return "Orçamento "+num(o)+" - Leão Orça\nCliente: "+o.cliente+"\n"+o.itens.map(i=>"• "+i.d+" ("+i.q+"x "+brl(i.p)+") = "+brl(i.p*i.q)).join("\n")+(o.desc?"\nDesconto: "+o.desc+"%":"")+"\nTotal: "+brl(tot(o))}
 function waUrl(o){const c=DB.clientes.find(x=>x.nome==o.cliente);let n=((c&&c.tel)||"").replace(/\D/g,"");if(n.length==10||n.length==11)n="55"+n;return "https://wa.me/"+n+"?text="+encodeURIComponent(txt(o))}
 function mailUrl(o){return "https://mail.google.com/mail/?view=cm&fs=1&su="+encodeURIComponent("Orçamento "+num(o))+"&body="+encodeURIComponent(txt(o))}
@@ -389,6 +395,7 @@ function instala(){const e=window._inst;if(e){window._inst=null;fecha();e.prompt
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();window._inst=e});
 window.addEventListener("appinstalled",()=>{window._inst=null});
 window.addEventListener("offline",()=>stat("📴"));
+document.addEventListener("visibilitychange",()=>{if(document.hidden&&window._sujo){window._sujo=0;flush()}});
 if("serviceWorker" in navigator){const prim=!navigator.serviceWorker.controller;navigator.serviceWorker.register("sw.js").catch(()=>{});if(prim)navigator.serviceWorker.addEventListener("controllerchange",()=>{if(!sessionStorage.getItem("rl")){sessionStorage.setItem("rl","1");location.reload()}})}
 try{if(localStorage.getItem("leao-uid"))document.getElementById("login").style.display="none"}catch(e){}
 if("serviceWorker" in navigator)navigator.serviceWorker.addEventListener("message",e=>{if(e.data=="nova"&&!document.getElementById("nvv")){const t=document.createElement("div");t.id="nvv";t.style.cssText="position:fixed;left:12px;right:12px;bottom:84px;z-index:40;background:var(--tx);color:var(--bg);border-radius:14px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px";t.innerHTML='<span>Nova versão disponível</span><button class="chip" style="background:var(--pr);color:var(--on);border:0" onclick="location.reload()">Atualizar</button>';document.body.appendChild(t)}});
@@ -403,15 +410,15 @@ import {initializeApp} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,sendPasswordResetEmail,signOut,reauthenticateWithCredential,EmailAuthProvider,deleteUser} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 import {getFirestore,doc,getDoc,setDoc,deleteDoc} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 const app=initializeApp({apiKey:"AIzaSyCiktArK24SrEQ9PbOAxwVEibfcWUCwMlQ",authDomain:"leao-orca.firebaseapp.com",projectId:"leao-orca",storageBucket:"leao-orca.firebasestorage.app",messagingSenderId:"919909307707",appId:"1:919909307707:web:f06d755d204485a39d131e"});
-const auth=getAuth(app),fs=getFirestore(app);
-const q=id=>document.getElementById(id),msg=t=>q("lm").textContent=t;
+const auth=getAuth(app),fs=getFirestore(app);auth.languageCode="pt-BR";
+const q=id=>document.getElementById(id),msg=(t,ok)=>{const e=q("lm");e.textContent=t;e.style.color=ok?"var(--ok)":"var(--rd)"};
 const show=w=>{q("lc").style.display=w=="c"?"block":"none";q("lf").style.display=w=="f"?"block":"none";q("login").style.display="flex"};
 const errs={"auth/invalid-credential":"E-mail ou senha incorretos.","auth/wrong-password":"Senha incorreta.","auth/invalid-email":"E-mail inválido.","auth/email-already-in-use":"Este e-mail já tem conta. Toque em Entrar.","auth/weak-password":"A senha precisa ter ao menos 6 caracteres.","auth/missing-password":"Digite a senha.","auth/network-request-failed":"Sem conexão com a internet.","auth/too-many-requests":"Muitas tentativas. Aguarde um pouco.","auth/operation-not-allowed":"O login por e-mail e senha ainda não foi ativado no Firebase.","auth/missing-email":"Digite seu e-mail."};
 const E=e=>errs[e.code]||"Erro: "+(e.code||e.message);
 window.entrar=async()=>{msg("");try{await signInWithEmailAndPassword(auth,q("le").value.trim(),q("ls").value)}catch(e){msg(E(e))}};
 window.criar=async()=>{msg("");if(!q("lt").checked){msg("Marque que leu e aceita os Termos e a Política de Privacidade para criar a conta.");return}
   try{const c=await createUserWithEmailAndPassword(auth,q("le").value.trim(),q("ls").value);try{await setDoc(doc(fs,"users",c.user.uid,"data","aceite"),{em:new Date().toISOString(),termos:"2026-11-06"})}catch(e){}}catch(e){msg(E(e))}};
-window.esqueci=async()=>{const m=q("le").value.trim();if(!m){msg("Digite seu e-mail acima.");return}try{await sendPasswordResetEmail(auth,m);msg("Enviamos um e-mail para redefinir a senha.")}catch(e){msg(E(e))}};
+window.esqueci=async()=>{const m=q("le").value.trim();if(!m){msg("Digite seu e-mail acima.");return}try{await sendPasswordResetEmail(auth,m);msg("Se existir uma conta com esse e-mail, enviamos o link para redefinir a senha. Olhe também a caixa de spam.",true)}catch(e){msg(E(e))}};
 window.sair=async()=>{fecha();await signOut(auth);setCL(null);resetLocal()};
 window.excluirConta=()=>{sheet(`<h3>Excluir minha conta</h3><p class="mu">Isso apaga <b>para sempre</b> a sua conta e todos os seus dados: clientes, orçamentos, pagamentos, agenda e dados da empresa. Não dá para desfazer. Se quiser, use antes “Exportar meus dados”.</p><label>Digite sua senha para confirmar</label><input id="xs" type="password" autocomplete="current-password"><p id="xm" style="color:var(--rd);min-height:20px;font-size:14px;margin:0 0 8px"></p><button class="btn" style="background:var(--rd);color:#fff" onclick="confirmaExcluir()">Excluir definitivamente</button><button class="btn ghost" style="margin-top:8px" onclick="conta()">Cancelar</button>`)};
 window.confirmaExcluir=async()=>{const u=auth.currentUser;if(!u)return;q("xm").textContent="";
