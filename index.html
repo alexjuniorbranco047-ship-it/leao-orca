@@ -80,7 +80,7 @@ nav .cal{display:flex;flex-direction:column;width:26px;height:24px;margin:0 auto
 </div></div></div>
 <script>
 const ST=["Pendente","Aprovado","Em andamento","Concluído"];
-const COR={"Pendente":"var(--wa)","Aprovado":"#8b5cf6","Em andamento":"var(--bl)","Concluído":"var(--ok)"};
+const COR={"Pendente":"var(--wa)","Aprovado":"#f7b900","Em andamento":"var(--bl)","Concluído":"var(--ok)"};
 const brl=n=>n.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const tot=o=>Math.max(0,o.itens.reduce((s,i)=>s+i.p*i.q,0)*(1-(o.desc||0)/100));
@@ -126,7 +126,7 @@ inicio(){
 pedidos(){
   let ps=[...DB.pedidos].reverse().filter(o=>(filtro=="Todos"||o.status==filtro)&&o.cliente.toLowerCase().includes(busca.toLowerCase()));
   return `<input placeholder="Buscar por cliente" value="${esc(busca)}" oninput="busca=this.value;lst()">
-  <div class="chips">${["Todos",...ST].map(s=>{const c=COR[s],on=filtro==s;return `<button class="chip ${on&&!c?"on":""}" style="${c?(on?"background:"+c+";border-color:"+c+";color:#fff":"border-color:"+c):""}" onclick="filtro='${s}';render()">${c&&!on?`<span class="dot" style="background:${c}"></span>`:""}${s}</button>`}).join("")}</div><div id="lst">${lista(ps)}</div>`},
+  <div class="chips">${["Todos",...ST].map(s=>{const c=COR[s],on=filtro==s;return `<button class="chip ${on&&!c?"on":""}" style="${c?(on?"background:"+c+";border-color:"+c+";color:"+(c=="#f7b900"?"#2a2000":"#fff"):"border-color:"+c):""}" onclick="filtro='${s}';render()">${c&&!on?`<span class="dot" style="background:${c}"></span>`:""}${s}</button>`}).join("")}</div><div id="lst">${lista(ps)}</div>`},
 clientes(){const tags=[...new Set(DB.clientes.flatMap(etqs))];return `<button class="btn ghost" style="margin-bottom:10px" onclick="novoCli()">+ Novo cliente</button><input placeholder="Buscar cliente" value="${esc(bcli)}" oninput="bcli=this.value;lcli()">${tags.length?`<div class="chips">${["Todos",...tags].map(t=>`<button class="chip ${ftag==t?"on":""}" onclick="ftag='${t}';render()">${esc(t)}</button>`).join("")}</div>`:""}<div id="lcli">${cliLista(filtraCli())}</div>`},
 catalogo(){return `<button class="btn ghost" style="margin-bottom:10px" onclick="cat()">+ Novo serviço ou produto</button>`+(DB.catalogo.length?[...DB.catalogo].sort((a,b)=>a.nome.localeCompare(b.nome)).map(c=>`<div class="card"><div class="row"><div><b>${esc(c.nome)}</b><br><small>${c.tipo}</small></div><b>${brl(c.preco)}</b></div><div class="row" style="justify-content:flex-end"><button class="chip" onclick="cat(${c.id})">Editar</button><button class="chip danger" onclick="delCat(${c.id})">Excluir</button></div></div>`).join(""):`<div class="empty">Cadastre seus serviços e produtos com preço.<br>Ao criar um orçamento, é só escolher da lista e o preço entra sozinho.</div>`)},
 agenda(){const h=hoje(),E=[...DB.agenda].sort((a,b)=>(a.data+(a.hora||"")).localeCompare(b.data+(b.hora||"")));
