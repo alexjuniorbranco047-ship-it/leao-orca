@@ -56,6 +56,7 @@ nav .cal{display:flex;flex-direction:column;width:26px;height:24px;margin:0 auto
 .bar{height:14px;border-radius:7px;background:var(--ln);overflow:hidden}.bar i{display:block;height:100%;border-radius:7px}
 .it{display:grid;grid-template-columns:1fr 78px 48px 38px;gap:6px;align-items:start}.it .chip{margin-top:4px;padding:9px 0}
 .empty{text-align:center;padding:30px 10px;color:var(--mu)}
+button[disabled]{opacity:.5;cursor:not-allowed}
 #login{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:auto}
 </style></head>
 <body>
@@ -69,14 +70,15 @@ nav .cal{display:flex;flex-direction:column;width:26px;height:24px;margin:0 auto
 <h1 style="margin:0 0 4px;font-size:28px;font-weight:800">Leão Orça</h1>
 <p class="mu" style="margin:0 0 18px">Orçamentos sem complicação</p>
 <div id="lc" class="mu">Carregando…</div>
+<div id="lr" style="display:none;text-align:left"></div>
 <div id="lf" style="display:none;text-align:left">
 <label>E-mail</label><input id="le" type="email" autocomplete="email" inputmode="email">
-<label>Senha</label><input id="ls" type="password" autocomplete="current-password">
+<label>Senha</label><div style="position:relative"><input id="ls" type="password" autocomplete="current-password" style="padding-right:48px"><button class="chip" style="position:absolute;right:6px;top:10px;border:0;background:none" onclick="olho('ls',this)">👁</button></div>
 <label style="display:flex;gap:8px;align-items:flex-start;font-weight:400;margin:6px 0 4px"><input id="lt" type="checkbox" style="width:auto;margin:3px 0 0"><span>Li e aceito os <a href="legal.html#termos" target="_blank" rel="noopener" style="color:var(--pt)">Termos de Uso</a> e a <a href="legal.html#privacidade" target="_blank" rel="noopener" style="color:var(--pt)">Política de Privacidade</a> (necessário para criar a conta).</span></label>
 <p id="lm" style="color:var(--rd);min-height:20px;margin:0 0 8px;font-size:14px"></p>
 <button class="btn" onclick="entrar()">Entrar</button>
 <button class="btn ghost" style="margin-top:8px" onclick="criar()">Criar conta</button>
-<p style="text-align:center;margin-bottom:0"><button class="chip" style="border:0;background:none;color:var(--pt)" onclick="esqueci()">Esqueci a senha</button> <a href="legal.html#suporte" target="_blank" rel="noopener" style="color:var(--pt);font-size:14px;margin-left:8px">Suporte</a></p>
+<p style="text-align:center;margin-bottom:0"><button class="chip" style="border:0;background:none;color:var(--pt)" onclick="abreReset()">Esqueci a senha</button> <a href="legal.html#suporte" target="_blank" rel="noopener" style="color:var(--pt);font-size:14px;margin-left:8px">Suporte</a></p>
 </div></div></div>
 <script>
 const ST=["Pendente","Aprovado","Em andamento","Concluído"];
@@ -397,7 +399,7 @@ window.addEventListener("appinstalled",()=>{window._inst=null});
 window.addEventListener("offline",()=>stat("📴"));
 document.addEventListener("visibilitychange",()=>{if(document.hidden&&window._sujo){window._sujo=0;flush()}});
 if("serviceWorker" in navigator){const prim=!navigator.serviceWorker.controller;navigator.serviceWorker.register("sw.js").catch(()=>{});if(prim)navigator.serviceWorker.addEventListener("controllerchange",()=>{if(!sessionStorage.getItem("rl")){sessionStorage.setItem("rl","1");location.reload()}})}
-try{if(localStorage.getItem("leao-uid"))document.getElementById("login").style.display="none"}catch(e){}
+try{if(localStorage.getItem("leao-uid")&&!/oobCode/.test(location.search))document.getElementById("login").style.display="none"}catch(e){}
 if("serviceWorker" in navigator)navigator.serviceWorker.addEventListener("message",e=>{if(e.data=="nova"&&!document.getElementById("nvv")){const t=document.createElement("div");t.id="nvv";t.style.cssText="position:fixed;left:12px;right:12px;bottom:84px;z-index:40;background:var(--tx);color:var(--bg);border-radius:14px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px";t.innerHTML='<span>Nova versão disponível</span><button class="chip" style="background:var(--pr);color:var(--on);border:0" onclick="location.reload()">Atualizar</button>';document.body.appendChild(t)}});
 function setCL(x){CL=x}
 function getDados(){return {DB,EMP}}
@@ -407,17 +409,42 @@ setTimeout(()=>{const c=document.getElementById("lc");if(c&&c.style.display!="no
 </script>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,sendPasswordResetEmail,signOut,reauthenticateWithCredential,EmailAuthProvider,deleteUser} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,sendPasswordResetEmail,signOut,reauthenticateWithCredential,EmailAuthProvider,deleteUser,verifyPasswordResetCode,confirmPasswordReset} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 import {getFirestore,doc,getDoc,setDoc,deleteDoc} from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 const app=initializeApp({apiKey:"AIzaSyCiktArK24SrEQ9PbOAxwVEibfcWUCwMlQ",authDomain:"leao-orca.firebaseapp.com",projectId:"leao-orca",storageBucket:"leao-orca.firebasestorage.app",messagingSenderId:"919909307707",appId:"1:919909307707:web:f06d755d204485a39d131e"});
 const auth=getAuth(app),fs=getFirestore(app);auth.languageCode="pt-BR";
 const q=id=>document.getElementById(id),msg=(t,ok)=>{const e=q("lm");e.textContent=t;e.style.color=ok?"var(--ok)":"var(--rd)"};
-const show=w=>{q("lc").style.display=w=="c"?"block":"none";q("lf").style.display=w=="f"?"block":"none";q("login").style.display="flex"};
+const BASE=location.origin+location.pathname;
+const show=w=>{q("lc").style.display=w=="c"?"block":"none";q("lf").style.display=w=="f"?"block":"none";q("lr").style.display=w=="r"?"block":"none";q("login").style.display="flex"};
 const errs={"auth/invalid-credential":"E-mail ou senha incorretos.","auth/wrong-password":"Senha incorreta.","auth/invalid-email":"E-mail inválido.","auth/email-already-in-use":"Este e-mail já tem conta. Toque em Entrar.","auth/weak-password":"A senha precisa ter ao menos 6 caracteres.","auth/missing-password":"Digite a senha.","auth/network-request-failed":"Sem conexão com a internet.","auth/too-many-requests":"Muitas tentativas. Aguarde um pouco.","auth/operation-not-allowed":"O login por e-mail e senha ainda não foi ativado no Firebase.","auth/missing-email":"Digite seu e-mail."};
 const E=e=>errs[e.code]||"Erro: "+(e.code||e.message);
 window.entrar=async()=>{msg("");try{await signInWithEmailAndPassword(auth,q("le").value.trim(),q("ls").value)}catch(e){msg(E(e))}};
 window.criar=async()=>{msg("");if(!q("lt").checked){msg("Marque que leu e aceita os Termos e a Política de Privacidade para criar a conta.");return}
+  if(q("ls").value.length<8){msg("Use pelo menos 8 caracteres na senha.");return}
   try{const c=await createUserWithEmailAndPassword(auth,q("le").value.trim(),q("ls").value);try{await setDoc(doc(fs,"users",c.user.uid,"data","aceite"),{em:new Date().toISOString(),termos:"2026-11-06"})}catch(e){}}catch(e){msg(E(e))}};
+
+const mask=e=>{const [l,d]=String(e).split("@");if(!d)return e;return l[0]+"*".repeat(Math.max(3,l.length-2))+l.slice(-1)+"@"+d[0]+"*".repeat(Math.max(3,d.length-2))+d.slice(-1)};
+const passos=n=>`<small class="mu" style="font-weight:700">ETAPA ${n} DE 3</small><div style="display:flex;gap:8px;margin:6px 0 14px">${[1,2,3].map(i=>`<i style="flex:1;height:5px;border-radius:3px;background:${i<n?"var(--pt)":i==n?"var(--pr)":"var(--ln)"}"></i>`).join("")}</div>`;
+const rm=(t,ok)=>{const e=q("rm");if(e){e.textContent=t;e.style.color=ok?"var(--ok)":"var(--rd)"}};
+const campoSenha=(id,ph)=>`<div style="position:relative"><input id="${id}" type="password" placeholder="${ph}" autocomplete="new-password" style="padding-right:48px"><button class="chip" style="position:absolute;right:6px;top:10px;border:0;background:none" onclick="olho('${id}',this)">👁</button></div>`;
+function rst(n,d){d=d||{};const el=q("lr");clearInterval(window._tm);
+  if(n==1)el.innerHTML=passos(1)+`<h3 style="margin:0 0 6px">E-mail</h3><p class="mu" style="margin:0 0 10px">Digite o e-mail da sua conta. Vamos enviar um link para você criar uma nova senha.</p><label>E-mail</label><input id="re" type="email" autocomplete="email" inputmode="email" value="${esc(d.e||"")}"><p id="rm" style="min-height:20px;font-size:14px;margin:0 0 8px"></p><button class="btn" onclick="enviaReset()">Enviar link</button><button class="btn ghost" style="margin-top:8px" onclick="voltaLogin()">Voltar</button>`;
+  else if(n==2){el.innerHTML=passos(2)+`<h3 style="margin:0 0 6px">Verifique seu e-mail</h3><p class="mu" style="margin:0 0 4px">Se existir uma conta com este e-mail, enviamos um link para</p><p style="margin:0 0 10px;font-weight:700">${esc(mask(d.e))}</p><p class="mu" id="rt" style="margin:0 0 4px"></p><p class="mu" style="margin:0 0 12px">Abra o e-mail e toque no link para criar a nova senha. Confira também a caixa de spam.</p><button class="btn" id="rb" disabled onclick="reenviaReset()">Reenviar link</button><button class="btn ghost" style="margin-top:8px" onclick="voltaLogin()">Voltar ao login</button>`;
+    let t=60;const tick=()=>{const r=q("rt"),b=q("rb");if(!r){clearInterval(window._tm);return}if(t>0){r.textContent="Não recebeu? Você poderá reenviar em 00:"+String(t).padStart(2,"0");b.disabled=true;t--}else{r.textContent="Não recebeu?";b.disabled=false;clearInterval(window._tm)}};tick();window._tm=setInterval(tick,1000)}
+  else if(n==3)el.innerHTML=passos(3)+`<h3 style="margin:0 0 6px">Nova senha</h3><p class="mu" style="margin:0 0 10px">Conta: ${esc(mask(d.e))}</p><label>Nova senha</label>${campoSenha("rn","No mínimo 8 caracteres")}<label>Confirme a nova senha</label>${campoSenha("rc","Repita a mesma senha")}<p id="rm" style="min-height:20px;font-size:14px;margin:0 0 8px"></p><button class="btn" onclick="salvaReset()">Salvar nova senha</button>`;
+  else if(n==4)el.innerHTML=`<h3 style="margin:0 0 6px">Senha alterada ✓</h3><p class="mu">Agora você já pode entrar com a nova senha.</p><button class="btn" onclick="location.replace(BASE)">Ir para o login</button>`;
+  else el.innerHTML=`<h3 style="margin:0 0 6px">Link inválido ou expirado</h3><p class="mu">Este link já foi usado ou venceu. Peça um novo link para redefinir a senha.</p><button class="btn" onclick="rst(1,{})">Pedir novo link</button>`}
+window.rst=rst;
+window.olho=(id,b)=>{const i=q(id);i.type=i.type=="password"?"text":"password";b.textContent=i.type=="password"?"👁":"🙈"};
+window.abreReset=()=>{show("r");rst(1,{e:q("le").value.trim()})};
+window.voltaLogin=()=>{clearInterval(window._tm);show("f")};
+window.enviaReset=async()=>{const m=q("re").value.trim();if(!m){rm("Digite seu e-mail.");return}rm("Enviando…",true);try{await sendPasswordResetEmail(auth,m,{url:BASE});window._rm=m;rst(2,{e:m})}catch(e){rm(E(e))}};
+window.reenviaReset=async()=>{const b=q("rb");if(b)b.disabled=true;try{await sendPasswordResetEmail(auth,window._rm,{url:BASE});rst(2,{e:window._rm})}catch(e){const r=q("rt");if(r)r.textContent=E(e)}};
+window.salvaReset=async()=>{const a=q("rn").value,b=q("rc").value;if(a.length<8){rm("Use pelo menos 8 caracteres.");return}if(a!==b){rm("As senhas não são iguais.");return}rm("Salvando…",true);
+  try{await confirmPasswordReset(auth,window._oob,a);rst(4)}catch(e){rm(e.code=="auth/expired-action-code"||e.code=="auth/invalid-action-code"?"Este link venceu ou já foi usado. Peça um novo.":E(e))}};
+(async()=>{const P=new URLSearchParams(location.search);if(P.get("mode")!=="resetPassword"||!P.get("oobCode"))return;
+  window._reset=true;window._oob=P.get("oobCode");history.replaceState(null,"",BASE);show("r");
+  try{const em=await verifyPasswordResetCode(auth,window._oob);rst(3,{e:em})}catch(e){rst(0)}})();
 window.esqueci=async()=>{const m=q("le").value.trim();if(!m){msg("Digite seu e-mail acima.");return}try{await sendPasswordResetEmail(auth,m);msg("Se existir uma conta com esse e-mail, enviamos o link para redefinir a senha. Olhe também a caixa de spam.",true)}catch(e){msg(E(e))}};
 window.sair=async()=>{fecha();await signOut(auth);setCL(null);resetLocal()};
 window.excluirConta=()=>{sheet(`<h3>Excluir minha conta</h3><p class="mu">Isso apaga <b>para sempre</b> a sua conta e todos os seus dados: clientes, orçamentos, pagamentos, agenda e dados da empresa. Não dá para desfazer. Se quiser, use antes “Exportar meus dados”.</p><label>Digite sua senha para confirmar</label><input id="xs" type="password" autocomplete="current-password"><p id="xm" style="color:var(--rd);min-height:20px;font-size:14px;margin:0 0 8px"></p><button class="btn" style="background:var(--rd);color:#fff" onclick="confirmaExcluir()">Excluir definitivamente</button><button class="btn ghost" style="margin-top:8px" onclick="conta()">Cancelar</button>`)};
@@ -450,6 +477,7 @@ async function sincroniza(u,quieto){
   }finally{sincronizando=false}
 }
 onAuthStateChanged(auth,async u=>{
+  if(window._reset)return;
   if(!u){setCL(null);window.UEM=null;show("f");stat("📴");return}
   window.UEM=u.email;window.UID=u.uid;
   let local=false;try{local=localStorage.getItem("leao-uid")===u.uid}catch(e){}

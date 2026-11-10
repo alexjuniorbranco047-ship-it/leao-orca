@@ -1,5 +1,5 @@
 // Leão Orça - service worker (funcionamento sem internet)
-const V = "leao-v2";
+const V = "leao-v3";
 const EXT = ["cdnjs.cloudflare.com", "www.gstatic.com", "fonts.googleapis.com", "fonts.gstatic.com"];
 const PRE = ["./", "./index.html", "./legal.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./icon-180.png"];
 const PRE_EXT = [
@@ -37,7 +37,7 @@ self.addEventListener("fetch", e => {
       const c = await caches.open(V);
       const m = await c.match(r, { ignoreSearch: true });
       const rede = fetch(r, { cache: "no-cache" }).then(async res => {
-        if (res.ok) {
+        if (res.ok && !u.search) {
           const antigo = m && m.headers.get("etag"), novo = res.headers.get("etag");
           await c.put(r, res.clone());
           if (m && antigo && novo && antigo !== novo && (r.mode === "navigate" || u.pathname.endsWith("index.html"))) {
